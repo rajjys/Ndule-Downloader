@@ -5,6 +5,8 @@
 
 package com.mycompany.belony.nduledownload.main;
 
+import javax.swing.SwingUtilities;
+
 /**
  *
  * @author Jonathan Idy
@@ -12,7 +14,13 @@ package com.mycompany.belony.nduledownload.main;
 public class NduleDownload {
 
     public static void main(String[] args) {
-        ///A comment to start the day 
-        System.out.println("Hello World Johnny!");
+        
+        SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run() {
+                new MainWindow().showWindow();
+
+            }
+        });
     }
 }
