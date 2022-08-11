@@ -6,18 +6,13 @@ package com.mycompany.belony.nduledownload.main;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.validator.routines.UrlValidator;
-
 /**
  *
  * @author Jonathan Idy
  */
 public class WebValidationUtil {
     public static boolean isValidWebsite(String url){
-        String[] schemes = {"http","https"};
-        UrlValidator urlValidator = new UrlValidator(schemes);
-    if (urlValidator.isValid(url)) return true;
-    return false;
+        return true;
     }
     
     public static boolean isYoutubeVideo(String url){

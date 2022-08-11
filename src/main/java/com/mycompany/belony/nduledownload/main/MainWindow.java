@@ -4,8 +4,8 @@
  */
 package com.mycompany.belony.nduledownload.main;
 
-import static com.mycompany.belony.nduledownload.main.Constants.defaultSearch;
 import customViews.RoundJButton;
+import downloadManager.FormatChooserWindow;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
@@ -15,15 +15,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -49,24 +42,16 @@ public class MainWindow extends JFrame {
     private JPanel mainPanel;
     private JScrollPane mainScrollPane;
     private JLabel queryTypeLbl;
-    private ImageIcon yt_search_icon;
-    private ImageIcon yt_video_icon;
-    private BufferedImage yt_search_image;
-    private BufferedImage yt_video_image;
+    private final ImageIcon yt_search_icon;
+    private final ImageIcon yt_video_icon;
+    private YoutubeRequestModel ytModel;
     
     ///Constructor
     public MainWindow(){
         ///Init variables
-        try {
-            yt_search_image = ImageIO.read(new File("assets/icons/red_yt_search.png"));
-            yt_video_image = ImageIO.read(new File("assets/icons/yt_video.png"));
-            yt_search_icon = new ImageIcon(yt_search_image);
-            yt_video_icon = new ImageIcon(yt_video_image);
-        } catch (IOException ex) { ///In case the buffered image fails to load
             yt_search_icon = new ImageIcon("assets/icons/red_yt_search.png");
             yt_video_icon = new ImageIcon("assets/icons/yt_video.png");
-        }
-        
+            ytModel = new YoutubeRequestModel();
         ///Initialise the main GUI
         initGUIComponents();
         ///Activate Events
@@ -84,15 +69,13 @@ public class MainWindow extends JFrame {
         setIconImage(new ImageIcon("assets/icons/download_icon.png").getImage());
         ///Setting up the querytype label
         queryTypeLbl = new JLabel();
-        //queryTypeLbl.setMinimumSize(new Dimension(20,20));
+        queryTypeLbl.setMaximumSize(new Dimension(16,16));
         queryTypeLbl.setIcon(yt_search_icon);
         ///Setting up the queryField textfield
         queryField = new JTextField(); 
         queryField.setFont(new Font("Roboto", Font.PLAIN, 14));
         queryField.setMinimumSize(queryField.getPreferredSize());
-        queryField.setMargin(new Insets(0,6,0,6));
-    
-       /// searchBtn = new JButton("?");
+        queryField.setMargin(new Insets(0,8,0,8));
         ///Customize the menu button
         menuBtn = new RoundJButton();
        
@@ -109,7 +92,7 @@ public class MainWindow extends JFrame {
         c.ipady = 0;
         c.weightx = 0;
         c.weighty = 0;
-        c.fill = GridBagConstraints.BOTH;
+       // c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(1,4,1,4);
         mainPanel.add(queryTypeLbl, c);
         ///Constraints for the queryField
@@ -165,36 +148,24 @@ public class MainWindow extends JFrame {
     public void showWindow(){
         setVisible(true);
     }
-
     private void InitGUIEvents() {
         
        ///queryField Focus Event
        queryField.addFocusListener(new FocusListener(){
+       @Override
        public void focusGained(FocusEvent e) {
        String temp = queryField.getText();
        if(temp.equals(Constants.defaultSearch)){
            queryField.setText("");
        }
     }
+       @Override
         public void focusLost(FocusEvent e) {
         String temp = queryField.getText();
        if(temp.equals("")){
            queryField.setText(Constants.defaultSearch);
        }
     }
-       });
-       ///Enter key pressed.
-       queryField.addActionListener((ActionEvent e) -> {
-           String query = queryField.getText();
-           ///Check the query nature. Either youtube download if valid youtube video or youtube search
-
-               if(WebValidationUtil.isYoutubeVideo(query)){
-                  
-                   JOptionPane.showMessageDialog(this, WebValidationUtil.extractVideoID(query),
-                                   "DOWNLOAD", JOptionPane.OK_OPTION);
-               }
-               else JOptionPane.showMessageDialog(this, "Youtube search",
-                                   "SEARCH", JOptionPane.ERROR_MESSAGE);
        });
        ///Document listener to react when the user is typing content
        queryField.getDocument().addDocumentListener(new DocumentListener(){
@@ -213,7 +184,36 @@ public class MainWindow extends JFrame {
                 updateQueryIcon(queryField.getText()); 
            }
        });
-    }
+       ///Enter key pressed.
+       queryField.addActionListener((ActionEvent e) -> {
+           String query = queryField.getText();
+           ///Check the query nature. Either youtube download if valid youtube video or youtube search
+               if(!query.isBlank() && !query.isEmpty()) ///Assert it's not empty or otherwise blank
+               if(WebValidationUtil.isYoutubeVideo(query)){
+                  String videoId = WebValidationUtil.extractVideoID(query);
+                  ///Make video information request from youtube
+                  var video = ytModel.getVideoInfo(videoId);
+                  if(video == null){
+                      JOptionPane.showMessageDialog(this, "Could not find the video",
+                              "ERROR", JOptionPane.ERROR_MESSAGE);
+                      return;
+                  }
+                  else{
+                      ///Proceed to select the format
+                      var formatChooser = new FormatChooserWindow(video);
+                      ///JOptionPane.showMessageDialog(this, formatChooser, "Select format", JOptionPane.NO_OPTION);
+                      var frame = new JFrame();
+                      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                      frame.setMinimumSize(new Dimension(400,280));
+                      frame.add(formatChooser);
+                      frame.setVisible(true);
+                  }
+               }
+               else JOptionPane.showMessageDialog(this, "Youtube search",
+                                   "SEARCH", JOptionPane.ERROR_MESSAGE);
+       });
+}
+    
     public void updateQueryIcon(String query){
         if(WebValidationUtil.isYoutubeVideo(query)){
             ///change the type query type icon to youtube video

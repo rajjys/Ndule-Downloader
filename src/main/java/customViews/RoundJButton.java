@@ -22,7 +22,6 @@ public class RoundJButton extends JButton {
     setBackground(Color.white);
     setIcon(new ImageIcon("assets/icons/menu_dots.png"));
     setFocusable(false);
- 
     /*
      These statements enlarge the button so that it 
      becomes a circle rather than an oval.
