@@ -5,6 +5,7 @@
 package com.mycompany.belony.nduledownload.main;
 
 import customViews.RoundJButton;
+import downloadManager.Download;
 import downloadManager.FormatChooserWindow;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -45,6 +46,7 @@ public class MainWindow extends JFrame {
     private final ImageIcon yt_search_icon;
     private final ImageIcon yt_video_icon;
     private YoutubeRequestModel ytModel;
+    private FormatChooserWindow formatChooser;
     
     ///Constructor
     public MainWindow(){
@@ -52,6 +54,8 @@ public class MainWindow extends JFrame {
             yt_search_icon = new ImageIcon("assets/icons/red_yt_search.png");
             yt_video_icon = new ImageIcon("assets/icons/yt_video.png");
             ytModel = new YoutubeRequestModel();
+            formatChooser = new FormatChooserWindow();
+            
         ///Initialise the main GUI
         initGUIComponents();
         ///Activate Events
@@ -200,17 +204,17 @@ public class MainWindow extends JFrame {
                   }
                   else{
                       ///Proceed to select the format
-                      var formatChooser = new FormatChooserWindow(video);
-                      ///JOptionPane.showMessageDialog(this, formatChooser, "Select format", JOptionPane.NO_OPTION);
-                      var frame = new JFrame();
-                      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                      frame.setMinimumSize(new Dimension(400,280));
-                      frame.add(formatChooser);
-                      frame.setVisible(true);
+                      formatChooser.setLocationRelativeTo(this);
+                      var selectedFormat = formatChooser.updateAndShow(video); 
+                      if(selectedFormat != null){
+                          ///Proceed to download
+                          new Download(selectedFormat, video.title);
+                      }
                   }
                }
                else JOptionPane.showMessageDialog(this, "Youtube search",
                                    "SEARCH", JOptionPane.ERROR_MESSAGE);
+               queryField.setText("");
        });
 }
     

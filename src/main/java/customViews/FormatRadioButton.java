@@ -4,7 +4,6 @@
  */
 package customViews;
 
-import com.github.kiulian.downloader.model.videos.VideoInfo;
 import com.github.kiulian.downloader.model.videos.formats.AudioFormat;
 import com.github.kiulian.downloader.model.videos.formats.Format;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
@@ -15,30 +14,36 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import javax.swing.BorderFactory;
 import javax.swing.JRadioButton;
-import javax.swing.border.LineBorder;
 
 /**
  *
  * @author Jonathan Idy
  */
 public class FormatRadioButton extends JRadioButton {
-    
+        Format videoFormat;
+        String size;
     public FormatRadioButton(Format videoFormat){
+            this.videoFormat = videoFormat;
              var builder = new StringBuilder();
             if(videoFormat instanceof VideoFormat)
-                builder.append(((VideoFormat) videoFormat).height() + "p");   
+                builder.append(((VideoFormat) videoFormat).height() + "p ");   
             else{ ///case of Audio format
-                var sampleRate = ((AudioFormat)videoFormat).audioSampleRate();
+                var sampleRate = ((AudioFormat)videoFormat).averageBitrate();
                 builder.append(formatBitrate(sampleRate));
             }
             var sizeBytes = videoFormat.contentLength();
             if(sizeBytes == null) sizeBytes = 0L;
-            var size = formatSizeBytes(sizeBytes);
+            size = formatSizeBytes(sizeBytes);
             builder.append("(" + size + ")");
-            setText(size);
-            setPreferredSize(new Dimension(getPreferredSize().width, 25));
+            setText(builder.toString());
             setMargin(new Insets(2,4,2,4));
-            setBorder(BorderFactory.createLineBorder(Color.red.brighter()));     
+            setBorder(BorderFactory.createLineBorder(Color.red.brighter()));
+    }
+    public Format getSelectedFormat(){
+        return videoFormat;
+    }
+    public String getSelectedSize(){
+        return size;
     }
     private String formatSizeBytes(long sizeBytes){
         long absB = sizeBytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(sizeBytes);
@@ -52,7 +57,7 @@ public class FormatRadioButton extends JRadioButton {
             ci.next();
         }
         value *= Long.signum(sizeBytes);
-        return String.format("%.1f %ciB", value / 1024.0, ci.current());
+        return String.format("%.1f %cB", value / 1024.0, ci.current());
     }
     private String formatBitrate(int sampleRate){
         long absB = sampleRate == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(sampleRate);
@@ -66,6 +71,6 @@ public class FormatRadioButton extends JRadioButton {
             ci.next();
         }
         value *= Long.signum(sampleRate);
-        return String.format("%.1f %cibps", value / 1024.0, ci.current());
+        return String.format("%.1f %cbps", value / 1024.0, ci.current());
     }
 }

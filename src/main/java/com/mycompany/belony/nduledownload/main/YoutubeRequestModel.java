@@ -9,13 +9,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.CharacterIterator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
-import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +59,6 @@ public class YoutubeRequestModel {
                     response.append(inputLine);
                 }
                 reader.close();
-                System.out.println("Request completed");
                 ///return the raw json reponse
                 return response.toString();
             }

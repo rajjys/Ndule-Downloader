@@ -4,229 +4,82 @@
  */
 package downloadManager;
 
+import com.github.kiulian.downloader.YoutubeDownloader;
+import com.github.kiulian.downloader.downloader.request.RequestVideoInfo;
+import com.github.kiulian.downloader.downloader.response.Response;
 import com.github.kiulian.downloader.model.videos.VideoInfo;
+import com.github.kiulian.downloader.model.videos.formats.AudioFormat;
+import com.github.kiulian.downloader.model.videos.formats.Format;
+import com.github.kiulian.downloader.model.videos.formats.VideoWithAudioFormat;
 import com.mycompany.belony.nduledownload.main.Video;
 import customViews.FormatRadioButton;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 /**
  *
  * @author Jonathan Idy
  */
-public class FormatChooserWindow extends JPanel {
-    ///Information fields
-    String vidTitle;
-    String vidDuration;
-    String vidViews;
-    String vidPublishDate;
-    String vidChannel;
-    String vidID;
-    String vidThumbURL;
-    String vidComments;
+public class FormatChooserWindow extends JDialog implements ActionListener{
     ///Icons
-    ImageIcon vidThumbnailIcon;
     ImageIcon vidTabIcon;
     ImageIcon audTabIcon;
-    ///Components panels
-    JPanel videoPanel; ////should hold the thumnail image, the title and the video formats
-    JPanel audioPanel; ///Shoudl hold then thumbnail image, the title and the audio formats
-    ///Informations labels
-    JLabel vidTitleLabel; ///to hold the title for the videos tab
-    JLabel vidThumbnailLabel;  ///to display the image for the videos tab
-    JLabel vidViewsLabel;
-    JLabel vidCommentsLabel;
-    JLabel vidChannelLabel;
-    JLabel vidDurationLabel;
-    JLabel vidDateLabel;
-    JLabel audTitleLabel; ///to hold the title for the audios tab
+    private final JButton downloadButton;
+    private final JButton cancelButton;
+    private FormatRadioButton selectedButton;
+    private final JPanel vidContentPanel;
+    private final JPanel audContentPanel;
+    private final JTabbedPane tabbedPane;
+    private final JPanel buttonPanel;
     
-    JLabel audThumbnailLabel;   ///to display the image for the audios tab
-    JLabel audViewsLabel;
-    JLabel audChannelLabel;
-    JLabel audDateLabel;
-    JLabel audDurationLabel;
-    JLabel audCommentsLabel;
     
-    boolean paintNow = false; ///flag to allow painting of the image only when its done loading
-    
-    JTabbedPane tabbedPane;   ////container to hold different tabs
-    Dimension defaultThumbSize = new Dimension(240,160);
-    public FormatChooserWindow(Video video){
-        ///setPreferredSize(new Dimension(400, 260))
-        
-        vidTitle = video.title;
-        vidThumbURL = video.thumbnailLink;
-        vidDuration = video.duration;
-        vidChannel = video.channel;
-        vidPublishDate = video.releaseDate;
-        vidViews = video.viewCount;
-        vidID = video.id;
-        vidComments = video.commentCount;
+    public FormatChooserWindow(){
+        ///image icons
         vidTabIcon = new ImageIcon("assets/icons/video_icon.png");
         audTabIcon = new ImageIcon("assets/icons/audio_icon.png");
-        initGUIComponents();
-        var imageLoader = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    var imageLink = new URL(vidThumbURL);
-                    vidThumbnailIcon = new ImageIcon(ImageIO.read(imageLink));
-                } catch (MalformedURLException ex) {
-                    vidThumbnailIcon = new ImageIcon("assets/icons/default_thumbnail.png");
-                } catch (Exception ex) {
-                    
-                    vidThumbnailIcon = new ImageIcon("assets/icons/default_thumbnail.png");
-                }
-                finally{
-                  ///vidThumbnailLabel.setIcon(vidThumbnailIcon);
-                  ///audThumbnailLabel.setIcon(vidThumbnailIcon);
-                  paintNow = true;
-                }
-            }
-        });
-       imageLoader.start();
-    }
-    public void initGUIComponents(){
         
-        setMinimumSize(new Dimension(300, 380));
-        tabbedPane = new JTabbedPane();        
-        videoPanel = new JPanel();
-        audioPanel = new JPanel();
-        tabbedPane = new JTabbedPane();
+        ///Panels to hold all the previous panels respective of type
+        vidContentPanel = new JPanel();
+        audContentPanel = new JPanel();
+        vidContentPanel.setLayout(new BoxLayout(vidContentPanel, BoxLayout.LINE_AXIS));
+        audContentPanel.setLayout(new BoxLayout(audContentPanel, BoxLayout.LINE_AXIS));
         
-        vidTitleLabel = new JLabel(vidTitle);
-        vidThumbnailLabel = new JLabel();
-        vidViewsLabel = new JLabel(vidViews);
-        vidChannelLabel = new JLabel(vidChannel);
-        vidDateLabel = new JLabel(vidPublishDate);
-        vidDurationLabel = new JLabel(vidDuration);
-        vidCommentsLabel = new JLabel(vidComments);
-        audTitleLabel = new JLabel(vidTitle);
-        audThumbnailLabel = new JLabel();
-        audViewsLabel= new JLabel(vidViews);
-        audChannelLabel = new JLabel(vidChannel);
-        audDateLabel = new JLabel(vidPublishDate);
-        audDurationLabel = new JLabel(vidDuration);
-        audCommentsLabel = new JLabel(vidComments);
-        
-
-        
-        var vidInfoPanel = new JPanel();
-        vidInfoPanel.setLayout(new GridBagLayout());
-        var gbc = new GridBagConstraints();
-        ///Setup the video tab content first
-        vidThumbnailLabel.setPreferredSize(new Dimension(250,150));
-        ///insert the the thumbnail label
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridheight = 6;
-        gbc.gridwidth = 2;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        gbc.insets = new Insets(1,1,1,1);
-        gbc.fill = GridBagConstraints.BOTH;
-        vidInfoPanel.add(vidThumbnailLabel, gbc);
-        ///Add view count
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridheight = 1;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0;
-        gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.NONE;
-        vidInfoPanel.add(vidViewsLabel, gbc);
-        ///Add comment count
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        vidInfoPanel.add(vidCommentsLabel, gbc);
-        ///Add channel 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        vidInfoPanel.add(vidChannelLabel, gbc);
-        ///Add released time
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        vidInfoPanel.add(vidDateLabel, gbc);
-        ///Add Duration
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        vidInfoPanel.add(vidDurationLabel, gbc);
-        ///Add title label
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridheight = 2;
-        gbc.gridwidth = 2;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        vidInfoPanel.add(vidTitleLabel, gbc);
-        ///Audio Panel
-        var audInfoPanel = new JPanel();
-        audInfoPanel.setLayout(new GridBagLayout());
-        ///Setup the video tab content first
-        audThumbnailLabel.setPreferredSize(new Dimension(250,150));
-        ///insert the the thumbnail label
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridheight = 6;
-        gbc.gridwidth = 2;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.BOTH;
-        audInfoPanel.add(audThumbnailLabel, gbc);
-        ///Add view count
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridheight = 1;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0;
-        gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.NONE;
-        audInfoPanel.add(audViewsLabel, gbc);
-        ///Add comment count
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        audInfoPanel.add(audCommentsLabel, gbc);
-        ///Add channel 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        audInfoPanel.add(audChannelLabel, gbc);
-        ///Add released time
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        audInfoPanel.add(audDateLabel, gbc);
-        ///Add Duration
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        audInfoPanel.add(audDurationLabel, gbc);
-        ///Add title label
-         ///Add title label
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridheight = 2;
-        gbc.gridwidth = 2;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        audInfoPanel.add(audTitleLabel, gbc);
         ///Add the panels to the main window
-        tabbedPane.addTab("Video", vidTabIcon, vidInfoPanel, "Video Formats");
-        tabbedPane.addTab("Audio", audTabIcon, audInfoPanel, "Audio Formats");
+        tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Video", vidTabIcon, vidContentPanel, "Video Formats");
+        tabbedPane.addTab("Audio", audTabIcon, audContentPanel, "Audio Formats");
+        ///Add control buttons for download and for cancel
+         downloadButton = new JButton("Download");
+         downloadButton.setActionCommand("download");
+         downloadButton.addActionListener(this);
+         cancelButton = new JButton("Cancel");
+         cancelButton.setActionCommand("cancel");
+         cancelButton.addActionListener(this);
+        buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(downloadButton);
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.setBorder(new EmptyBorder(5,0,5,0));
+        var gbc = new GridBagConstraints();
         setLayout(new GridBagLayout());
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -236,20 +89,93 @@ public class FormatChooserWindow extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         add(tabbedPane, gbc);
+        gbc.gridy = 1;
+        gbc.gridheight = 1;
+        gbc.weighty = 0;
+        add(buttonPanel, gbc);
+        ///window configuration
+        setModal(true);
+        setResizable(false);
+        setUndecorated(true);
+        getRootPane().setBorder( BorderFactory.createLineBorder(Color.gray.brighter()) );
+        setMinimumSize(new Dimension(400,280));
+        setMaximumSize(new Dimension(400,280));
     }
-    public void getDownloadFormat(){
-        this.setVisible(true);  
+    public Format updateAndShow(Video video){
+        selectedButton = null;
+        downloadButton.setText("Download");
+        ///Panels to hold video informations and thumbnail
+        var vidInfoPanel = new VideoDetailsView(video);
+        var audInfoPanel = new VideoDetailsView(video);
+        var vidFormatsPanel = new JPanel();
+        var audFormatsPanel = new JPanel();
+        var buttonGroup = new ButtonGroup();
+        vidFormatsPanel.setLayout(new BoxLayout(vidFormatsPanel, BoxLayout.PAGE_AXIS));
+        audFormatsPanel.setLayout(new BoxLayout(audFormatsPanel, BoxLayout.PAGE_AXIS));
+        ///Get downloadable formats for the video
+        // init downloader with default config
+        YoutubeDownloader downloader = new YoutubeDownloader();
+        // sync parsing
+        RequestVideoInfo request = new RequestVideoInfo(video.id);
+        Response<VideoInfo> response = downloader.getVideoInfo(request);
+        if(response.ok()){
+            VideoInfo videoInfo = response.data();
+            // get videos formats only with audio
+            List<VideoWithAudioFormat> videoWithAudioFormats = videoInfo.videoWithAudioFormats();
+            videoWithAudioFormats.forEach(it -> {
+            ///Add option button to group
+                var option = new FormatRadioButton(it);
+                option.addActionListener(this);
+                buttonGroup.add(option);
+                vidFormatsPanel.add(option);
+            });
+            // get audio formats
+            List<AudioFormat> audioFormats = videoInfo.audioFormats();
+            audioFormats.forEach(it -> {
+                var option = new FormatRadioButton(it);
+                option.addActionListener(this);
+                buttonGroup.add(option);
+                audFormatsPanel.add(option);
+            });
+            
+        }
+        ///Empty the content panel before adding new values
+        vidContentPanel.removeAll();
+        audContentPanel.removeAll();
+        vidContentPanel.add(vidInfoPanel);
+        vidContentPanel.add(vidFormatsPanel);
+        audContentPanel.add(audInfoPanel);
+        audContentPanel.add(audFormatsPanel);
+        vidContentPanel.revalidate();
+        audContentPanel.revalidate();
+        pack();
+        setVisible(true);
+        return selectedButton != null ? selectedButton.getSelectedFormat() : null;
     }
+
     @Override
-    public void paintComponent(Graphics g) 
-    {
-        super.paintComponent(g);
-        while(!paintNow){try {
-            Thread.sleep(250);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(FormatChooserWindow.class.getName()).log(Level.SEVERE, null, ex);
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() instanceof FormatRadioButton){
+            var radioButton = (FormatRadioButton) e.getSource();
+            if(radioButton.isSelected()){
+                var size = "Download(" + radioButton.getSelectedSize() + ")";
+                downloadButton.setText(size);
+                selectedButton = radioButton;
             }
-}
-        g.drawImage(vidThumbnailIcon.getImage(), 0, 0,  this.getWidth(), this.getHeight(), null);
+        }
+        else if(e.getActionCommand().equals("download")){
+            ///
+            if(selectedButton != null){
+                ///Download selected format
+                setVisible(false);
+                dispose();
+            }
+        }
+        else if(e.getActionCommand().equals("cancel")){
+            ///Cancel
+            selectedButton = null;
+            setVisible(false);
+            dispose();
+        }
     }
 }
