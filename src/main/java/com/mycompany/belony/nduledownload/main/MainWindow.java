@@ -6,7 +6,9 @@ package com.mycompany.belony.nduledownload.main;
 
 import customViews.RoundJButton;
 import downloadManager.Download;
+import downloadManager.DownloadManagerWindow;
 import downloadManager.FormatChooserWindow;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
@@ -20,6 +22,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -45,16 +49,25 @@ public class MainWindow extends JFrame {
     private JLabel queryTypeLbl;
     private final ImageIcon yt_search_icon;
     private final ImageIcon yt_video_icon;
+    private final ImageIcon menu_icon;
     private YoutubeRequestModel ytModel;
     private FormatChooserWindow formatChooser;
+    private DownloadManagerWindow dmPanel;
     
     ///Constructor
     public MainWindow(){
-        ///Init variables
+
+            mainScrollPane = new JScrollPane();
+            mainPanel = new JPanel();
             yt_search_icon = new ImageIcon("assets/icons/red_yt_search.png");
             yt_video_icon = new ImageIcon("assets/icons/yt_video.png");
+            menu_icon = new ImageIcon("assets/icons/menu_dots.png");
+                    ///Init variables
+            queryTypeLbl = new JLabel();
+            menuBtn = new RoundJButton(menu_icon);
             ytModel = new YoutubeRequestModel();
             formatChooser = new FormatChooserWindow();
+            dmPanel = new DownloadManagerWindow();
             
         ///Initialise the main GUI
         initGUIComponents();
@@ -72,7 +85,7 @@ public class MainWindow extends JFrame {
         ///Set program icon
         setIconImage(new ImageIcon("assets/icons/download_icon.png").getImage());
         ///Setting up the querytype label
-        queryTypeLbl = new JLabel();
+        
         queryTypeLbl.setMaximumSize(new Dimension(16,16));
         queryTypeLbl.setIcon(yt_search_icon);
         ///Setting up the queryField textfield
@@ -81,59 +94,30 @@ public class MainWindow extends JFrame {
         queryField.setMinimumSize(queryField.getPreferredSize());
         queryField.setMargin(new Insets(0,8,0,8));
         ///Customize the menu button
-        menuBtn = new RoundJButton();
-       
-        mainScrollPane = new JScrollPane();
-        mainPanel = new JPanel();
+        
         ///Adding component to the main panel
-        mainPanel.setLayout(new GridBagLayout());
+        var layout = new GridBagLayout();
+        mainPanel.setLayout(layout);
         var c = new GridBagConstraints();
         ///Constraints for the queryTypeLbl
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridheight = 1;
-        c.gridwidth = 1;
         c.ipady = 0;
-        c.weightx = 0;
-        c.weighty = 0;
        // c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(1,4,1,4);
-        mainPanel.add(queryTypeLbl, c);
+        addComponent(queryTypeLbl, mainPanel, layout, c, 0,0,1,1,0,0);
         ///Constraints for the queryField
-        c.gridx = 1;
-        c.gridy = 0;
-        c.gridheight = 1;
-        c.gridwidth = 1;
         c.ipady = 4;
-        c.weightx = 1;
-        c.weighty = 0;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(1,1,1,1);
-        mainPanel.add(queryField, c);
-        ///Constraints for the search button
-        
+        addComponent(queryField, mainPanel, layout, c, 1,0,1,1,1,0);
         ///Constraints for the menu button
-        c.gridx = 2;
-        c.gridy = 0;
-        c.gridheight = 1;
-        c.gridwidth = 1;
         c.ipady = 0;
-        c.weightx = 0;
-        c.weighty = 0;
         c.fill = GridBagConstraints.NONE;
         c.insets = new Insets(6,1,6,1);
-        mainPanel.add(menuBtn, c);
+        addComponent(menuBtn, mainPanel, layout, c, 2,0,1,1,0,0);
         ///Constraints for the mainScrollPane
-        c.gridx = 0;
-        c.gridy = 1;
-        c.gridheight = 1;
-        c.gridwidth = 3;
-        c.weightx = 1;
-        c.weighty = 1;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(1,1,1,1);
-        mainPanel.add(mainScrollPane, c);
-        
+        addComponent(mainScrollPane, mainPanel, layout, c, 0,1,3,1,1,1);
         add(mainPanel);///Add the main panel to the main window
         pack();
         ///Position window at the top right corner upon startup
@@ -142,7 +126,20 @@ public class MainWindow extends JFrame {
         Rectangle rect = defaultScreen.getDefaultConfiguration().getBounds();
         int x = (int) rect.getMaxX() - getWidth();
         int y = 0;
-         setLocation(x, y);
+        setLocation(x, y);
+    }
+    public void addComponent(JComponent component, Container container,
+            GridBagLayout layout, GridBagConstraints gbc,
+            int gridx, int gridy,
+            int gridwidth, int gridheight,
+            int weightx, int weighty){
+            gbc.gridx = gridx;
+            gbc.gridy = gridy;
+            gbc.gridwidth = gridwidth;
+            gbc.gridheight = gridheight;
+            gbc.weightx = weightx;
+            gbc.weighty = weighty;
+            container.add(component,gbc);
     }
     ///Hide this frame
     public void hideWindow(){
@@ -208,13 +205,18 @@ public class MainWindow extends JFrame {
                       var selectedFormat = formatChooser.updateAndShow(video); 
                       if(selectedFormat != null){
                           ///Proceed to download
-                          new Download(selectedFormat, video.title);
+                          var download = new Download(selectedFormat, video);
+                          dmPanel.actionAdd(download);
                       }
                   }
                }
                else JOptionPane.showMessageDialog(this, "Youtube search",
                                    "SEARCH", JOptionPane.ERROR_MESSAGE);
                queryField.setText("");
+       });
+       ///menuBtn actionlisteners
+       menuBtn.addActionListener((ActionEvent e) -> {
+           dmPanel.updateAndShow();
        });
 }
     

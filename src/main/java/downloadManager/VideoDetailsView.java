@@ -5,10 +5,8 @@
 package downloadManager;
 
 import com.mycompany.belony.nduledownload.main.Video;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -19,7 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import themes.ComponentCustomizer;
 
 /**
  *
@@ -47,17 +45,17 @@ public class VideoDetailsView extends JPanel{
     private void initGUIComponents() {
         setMinimumSize(new Dimension(184, 138));
         var vidTitleLabel = new JLabel(video.title);
-        customizeLabel(vidTitleLabel);
+        ComponentCustomizer.customizeLabel(vidTitleLabel, 1);
         var vidViewsLabel = new JLabel(video.viewCount);
-        customizeLabel(vidViewsLabel);
+        ComponentCustomizer.customizeLabel(vidViewsLabel, 1);
         var vidChannelLabel = new JLabel(video.channel);
-        customizeLabel(vidChannelLabel);
+        ComponentCustomizer.customizeLabel(vidChannelLabel, 1);
         var vidDateLabel = new JLabel(video.releaseDate);
-        customizeLabel(vidDateLabel);
+        ComponentCustomizer.customizeLabel(vidDateLabel, 1);
         var vidDurationLabel = new JLabel(video.duration);
-        customizeLabel(vidDurationLabel);
+        ComponentCustomizer.customizeLabel(vidDurationLabel, 1);
         var vidCommentsLabel = new JLabel(video.commentCount);
-        customizeLabel(vidCommentsLabel);
+        ComponentCustomizer.customizeLabel(vidCommentsLabel, 1);
         
         var layout = new GridBagLayout();    
         var gbc = new GridBagConstraints();
@@ -79,16 +77,6 @@ public class VideoDetailsView extends JPanel{
         gbc.weightx = 1;
         addComponent(vidTitleLabel, this, layout,gbc, 0,6,2,2);
         
-    }
-
-    private void customizeLabel(JLabel label) {
-      var courrier = new Font("Roboto", Font.BOLD,12);
-        label.setFont(courrier);
-        label.setForeground(Color.white);
-        label.setOpaque(true);
-        label.setBorder(new EmptyBorder(2,4,2,4));
-        label.setBackground(new Color(0,0,0,156));
-        ///label.setBorder(new RoundedBorder(Color.black, 2)); 
     }
     public ImageIcon getThumbnail(){
         return vidThumbnailIcon;

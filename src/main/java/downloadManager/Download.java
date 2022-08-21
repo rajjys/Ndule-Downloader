@@ -9,12 +9,10 @@ import com.github.kiulian.downloader.downloader.YoutubeProgressCallback;
 import com.github.kiulian.downloader.downloader.request.RequestVideoFileDownload;
 import com.github.kiulian.downloader.downloader.response.Response;
 import com.github.kiulian.downloader.model.videos.formats.Format;
+import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
+import com.mycompany.belony.nduledownload.main.Video;
 import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.Date;
 import java.util.Observable;
 
 /**
@@ -23,7 +21,6 @@ import java.util.Observable;
  */
 public class Download extends Observable implements Runnable{
 
-        private static final int MAX_BUFFER_SIZE = 1024;
 	public static final String STATUSES[]={"Downloading","Paused","Complete","Canceled","Error"};
 
 	public static final int DOWNLOADING = 0;
@@ -32,36 +29,48 @@ public class Download extends Observable implements Runnable{
 	public static final int CANCELED=3;
 	public static final int ERROR=4;
 
-	private Long size;
-	private int downloaded;
+	private final Long size;
 	private int status;
-        private String home = System.getProperty("user.home");
-        private String downloadFolder = home + "\\Downloads\\";
+        private final String home = System.getProperty("user.home");
+        private final String downloadFolder = home + "\\Downloads\\";
         private final Format videoFormat;
-        private final String title;
-        private float progression = 0;
+        private int progression = 0;
+        private Video video;
+        private final Date timeStamp;
         
-    public Download(Format videoFormat, String title){
+    public Download(Format videoFormat, Video video){
         this.videoFormat = videoFormat;
-        this.title = title;
+        this.video = video;
+        timeStamp = new Date();///Time when the download was initiated
         size = videoFormat.contentLength();
-            downloaded=0;
-            status=DOWNLOADING;
-            download();
+            status = DOWNLOADING;
+           download();
 	}
         ///getters
     public String getTitle(){
-	return title;
+	return video.title;
 	}
     public Long getSize(){
 	return size;
 	}
-    public float getProgress(){
+    public int getProgress(){
 	return progression;
 	}
     public int getStatus(){
 	return status;
 	}
+    public String getDuration(){
+        return video.duration;
+    }
+    public String getPath(){
+        return downloadFolder;
+    }
+    public Date getTimeStamp(){
+        return timeStamp;
+    }
+    public boolean isRessourceVideo(){ ///Whether it's an audio or video
+        return videoFormat instanceof VideoFormat ? true:false;
+    }
         ///actions
     public void pause(){
             status=PAUSED;
@@ -80,13 +89,13 @@ public class Download extends Observable implements Runnable{
             status=ERROR;
             stateChanged();
 	}
-    private void download(){
+    public void download(){
             var thread = new Thread(this);
             thread.start();
 	}
+    
     @Override
     public void run() {
-        var downloadDirectory = new File(downloadFolder);
         var downloader = new YoutubeDownloader();
         // async downloading with callback
         var request = new RequestVideoFileDownload(videoFormat)
@@ -96,7 +105,7 @@ public class Download extends Observable implements Runnable{
                 ///notify observers on change
                 status = DOWNLOADING;
                 progression = progress;
-                stateChanged();
+                ///stateChanged();
                 System.out.printf("Downloaded %d%%\n", progress);
             }
     
@@ -104,21 +113,21 @@ public class Download extends Observable implements Runnable{
             public void onFinished(File videoInfo) {
                 ///Move file to download folder
                status = COMPLETE;
-               stateChanged();
+              // stateChanged();
                 System.out.println("Finished file: " + videoInfo);
             }
     
             @Override
             public void onError(Throwable throwable) {
                 status = ERROR;
-                stateChanged();
+                ///stateChanged();
                 System.out.println("Error: " + throwable.getLocalizedMessage());
             }
-        }).async().renameTo(title).saveTo(new File(downloadFolder));
+        }).async().renameTo(video.title).saveTo(new File(downloadFolder));
          
         Response<File> response = downloader.downloadVideoFile(request);
-        File data = response.data(); // will block current thread
-        
+        File data = response.data(); // will block current thread 
+        System.out.println("Got here too");
     }
     
     ///updater

@@ -19,7 +19,6 @@ public class NduleDownload {
             @Override
             public void run() {
                 new MainWindow().showWindow();
-
             }
         });
     }

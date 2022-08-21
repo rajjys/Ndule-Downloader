@@ -10,18 +10,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.CharacterIterator;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.StringCharacterIterator;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.ocpsoft.prettytime.PrettyTime;
+import themes.TextFormatUtil;
 
 /**
  *
@@ -84,7 +79,8 @@ public class YoutubeRequestModel {
                 v.id = (String)item.get("id"); ///video ID
                 ///Read content from the snippet braces
                 var snippet = (JSONObject)item.get("snippet");
-                v.releaseDate = pastTime((String)snippet.get("publishedAt"));
+                var date = (String)snippet.get("publishedAt");
+                v.releaseDate = TextFormatUtil.formatPastTime(date, "yyyy-MM-dd'T'HH:mm:ss'Z'");
                 v.title = (String)snippet.get("title");
                 v.description = (String)snippet.get("description");
                 v.channel = (String)snippet.get("channelTitle");
@@ -94,13 +90,13 @@ public class YoutubeRequestModel {
                 ///Read content from the contentDetails braces
                 var details = (JSONObject)item.get("contentDetails");
                 
-                v.duration = formatDuration((String)details.get("duration"));
+                v.duration = TextFormatUtil.formatDuration((String)details.get("duration"));
                 ///Read content from the statistics braces
                 var stats = (JSONObject)item.get("statistics");
                 var viewsCount = Long.valueOf((String)stats.get("viewCount"));
                 var commentCount = Long.valueOf((String)stats.get("commentCount"));
-                v.viewCount = formatNumber(viewsCount);
-                v.commentCount = formatNumber(commentCount);
+                v.viewCount = TextFormatUtil.formatNumberPrefix(viewsCount);
+                v.commentCount = TextFormatUtil.formatNumberPrefix(commentCount);
             }
             else return null;
         } catch (ParseException ex) {
@@ -109,40 +105,6 @@ public class YoutubeRequestModel {
             Logger.getLogger(YoutubeRequestModel.class.getName()).log(Level.SEVERE, null, ex);
         }
         return v;
-    }
-    private String pastTime(String timeStamp) throws java.text.ParseException{
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        var date = format.parse(timeStamp);
-        var p = new PrettyTime();
-        return p.format(date);
-    }
-    private String formatDuration(String duration){
-        String result = duration.replace("PT","").replace("H",":").replace("M",":").replace("S","");
-        String arr[]=result.split(":");
-        StringBuilder formattedTime;
-        if(arr.length == 1)
-            return String.format("%02d:%02d",0,
-                    Integer.parseInt(arr[0]));
-        if(arr.length == 2)
-            return String.format("%02d:%02d", 
-                    Integer.parseInt(arr[0]), 
-                    Integer.parseInt(arr[1]));
-        return String.format("%d:%02d:%02d", Integer.parseInt(arr[0]), Integer.parseInt(arr[1]),Integer.parseInt(arr[2]));
-    }
-    private String formatNumber(long number){
-        long absB = number == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(number);
-        if (absB < 1000) {
-            return number + "";
-        }
-        long value = absB;
-        CharacterIterator ci = new StringCharacterIterator("KMBT");
-        for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
-            value >>= 10;
-            ci.next();
-        }
-        value *= Long.signum(number);
-        return String.format("%.1f%c", value / 1000.0, ci.current());
     }
     public void getSearchResult(String query){
         

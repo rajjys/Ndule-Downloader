@@ -15,8 +15,11 @@ import com.mycompany.belony.nduledownload.main.Video;
 import customViews.FormatRadioButton;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -30,7 +33,6 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 
 /**
  *
@@ -42,7 +44,7 @@ public class FormatChooserWindow extends JDialog implements ActionListener{
     ImageIcon audTabIcon;
     private final JButton downloadButton;
     private final JButton cancelButton;
-    private FormatRadioButton selectedButton;
+    private FormatRadioButton selectedOption;
     private final JPanel vidContentPanel;
     private final JPanel audContentPanel;
     private final JTabbedPane tabbedPane;
@@ -97,12 +99,20 @@ public class FormatChooserWindow extends JDialog implements ActionListener{
         setModal(true);
         setResizable(false);
         setUndecorated(true);
+        setPreferredSize(new Dimension(400,280));
         getRootPane().setBorder( BorderFactory.createLineBorder(Color.gray.brighter()) );
-        setMinimumSize(new Dimension(400,280));
-        setMaximumSize(new Dimension(400,280));
+        ///Position window at the top right corner upon startup
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice defaultScreen = ge.getDefaultScreenDevice();
+        Rectangle rect = defaultScreen.getDefaultConfiguration().getBounds();
+        int x = (int) rect.getMaxX() - getWidth() + 100;
+        int y = 100;
+        setLocation(x, y);
+         pack();
     }
+    
     public Format updateAndShow(Video video){
-        selectedButton = null;
+        selectedOption = null;
         downloadButton.setText("Download");
         ///Panels to hold video informations and thumbnail
         var vidInfoPanel = new VideoDetailsView(video);
@@ -148,9 +158,8 @@ public class FormatChooserWindow extends JDialog implements ActionListener{
         audContentPanel.add(audFormatsPanel);
         vidContentPanel.revalidate();
         audContentPanel.revalidate();
-        pack();
         setVisible(true);
-        return selectedButton != null ? selectedButton.getSelectedFormat() : null;
+        return selectedOption != null ? selectedOption.getSelectedFormat() : null;
     }
 
     @Override
@@ -160,12 +169,12 @@ public class FormatChooserWindow extends JDialog implements ActionListener{
             if(radioButton.isSelected()){
                 var size = "Download(" + radioButton.getSelectedSize() + ")";
                 downloadButton.setText(size);
-                selectedButton = radioButton;
+                selectedOption = radioButton;
             }
         }
         else if(e.getActionCommand().equals("download")){
             ///
-            if(selectedButton != null){
+            if(selectedOption != null){
                 ///Download selected format
                 setVisible(false);
                 dispose();
@@ -173,7 +182,7 @@ public class FormatChooserWindow extends JDialog implements ActionListener{
         }
         else if(e.getActionCommand().equals("cancel")){
             ///Cancel
-            selectedButton = null;
+            selectedOption = null;
             setVisible(false);
             dispose();
         }

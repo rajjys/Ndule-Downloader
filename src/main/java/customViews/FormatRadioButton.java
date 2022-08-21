@@ -14,6 +14,7 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import javax.swing.BorderFactory;
 import javax.swing.JRadioButton;
+import themes.TextFormatUtil;
 
 /**
  *
@@ -29,11 +30,9 @@ public class FormatRadioButton extends JRadioButton {
                 builder.append(((VideoFormat) videoFormat).height() + "p ");   
             else{ ///case of Audio format
                 var sampleRate = ((AudioFormat)videoFormat).averageBitrate();
-                builder.append(formatBitrate(sampleRate));
+                builder.append(TextFormatUtil.formatBitrate(sampleRate));
             }
-            var sizeBytes = videoFormat.contentLength();
-            if(sizeBytes == null) sizeBytes = 0L;
-            size = formatSizeBytes(sizeBytes);
+            size = TextFormatUtil.formatSizeBytes(videoFormat.contentLength());
             builder.append("(" + size + ")");
             setText(builder.toString());
             setMargin(new Insets(2,4,2,4));
@@ -44,33 +43,5 @@ public class FormatRadioButton extends JRadioButton {
     }
     public String getSelectedSize(){
         return size;
-    }
-    private String formatSizeBytes(long sizeBytes){
-        long absB = sizeBytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(sizeBytes);
-        if (absB < 1024) {
-            return sizeBytes + " B";
-        }
-        long value = absB;
-        CharacterIterator ci = new StringCharacterIterator("KMGTPE");
-        for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
-            value >>= 10;
-            ci.next();
-        }
-        value *= Long.signum(sizeBytes);
-        return String.format("%.1f %cB", value / 1024.0, ci.current());
-    }
-    private String formatBitrate(int sampleRate){
-        long absB = sampleRate == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(sampleRate);
-        if (absB < 1024) {
-            return sampleRate + " bps";
-        }
-        long value = absB;
-        CharacterIterator ci = new StringCharacterIterator("kmgtpe");
-        for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
-            value >>= 10;
-            ci.next();
-        }
-        value *= Long.signum(sampleRate);
-        return String.format("%.1f %cbps", value / 1024.0, ci.current());
     }
 }
