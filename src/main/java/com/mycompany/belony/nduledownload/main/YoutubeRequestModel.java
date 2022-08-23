@@ -55,11 +55,13 @@ public class YoutubeRequestModel {
                 }
                 reader.close();
                 ///return the raw json reponse
+                System.out.println("Request complete");
                 return response.toString();
             }
         } catch (IOException ex) {
             
         }
+
         return null;
     }
     

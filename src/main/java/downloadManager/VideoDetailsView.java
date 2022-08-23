@@ -44,7 +44,9 @@ public class VideoDetailsView extends JPanel{
 
     private void initGUIComponents() {
         setMinimumSize(new Dimension(184, 138));
-        var vidTitleLabel = new JLabel(video.title);
+        var title = video.title;
+        if(title.length() > 50) title = title.substring(0, 50) + "...";
+        var vidTitleLabel = new JLabel(title);
         ComponentCustomizer.customizeLabel(vidTitleLabel, 1);
         var vidViewsLabel = new JLabel(video.viewCount);
         ComponentCustomizer.customizeLabel(vidViewsLabel, 1);

@@ -4,6 +4,7 @@
  */
 package downloadManager;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -15,10 +16,12 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 /**
  *
@@ -35,10 +38,11 @@ public class DownloadManagerWindow extends JDialog implements Observer{
        downloadPanel = new JPanel();
        downloadPanel.setLayout(new BoxLayout(downloadPanel, BoxLayout.PAGE_AXIS));
        mainScrollPane = new JScrollPane();
-       mainScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);  
-       mainScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+       mainScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);  
+       mainScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
        contentPanel = new JPanel();
-       
+       contentPanel.setOpaque(true);
+       contentPanel.setBackground(new Color(40,40,40));
        var gbc = new GridBagConstraints();
         contentPanel.setLayout(new GridBagLayout());
         gbc.gridx = 0;
@@ -53,6 +57,7 @@ public class DownloadManagerWindow extends JDialog implements Observer{
        setModal(true);
        setResizable(false);
        setPreferredSize(new Dimension(500,380));
+       setTitle("Downloads");
         
         pack();
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -65,7 +70,7 @@ public class DownloadManagerWindow extends JDialog implements Observer{
     public void updateContent(){
         int size = dtModel.getRowCount();
         downloadPanel.removeAll();
-        for(int i  = 0; i < size; i++){
+        for(int i  = size - 1; i >= 0; i--){
             ///Create downloadItemView for each download and add it to the panel
             DownloadItemView downloadItem = null;
             try {
@@ -73,13 +78,12 @@ public class DownloadManagerWindow extends JDialog implements Observer{
             } catch (ParseException ex) {
                 Logger.getLogger(DownloadManagerWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
-            downloadItem.setMinimumSize(new Dimension(getWidth(), 80));
-            downloadItem.setPreferredSize(new Dimension(this.getWidth() - 20, 100));
-            downloadItem.setMaximumSize(new Dimension(getWidth() - 20, 120));
+            downloadPanel.add(Box.createRigidArea(new Dimension(0, 5)));
             downloadPanel.add(downloadItem);
             System.out.println("video " + i + ": " + downloadItem.titleLabel.getText());
         }
         mainScrollPane.setViewportView(downloadPanel);
+        mainScrollPane.getVerticalScrollBar().setValue(0);
         mainScrollPane.revalidate();
     }
     public void actionAdd(Download d){
