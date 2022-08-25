@@ -22,7 +22,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.border.LineBorder;
 import themes.ComponentCustomizer;
 import themes.TextFormatUtil;
 
@@ -119,7 +118,7 @@ public class DownloadItemView extends JPanel implements Observer{
         
         setBorder(BorderFactory.createLineBorder(new Color(160,128,128)));
         setOpaque(true);
-        setBackground(new Color(240,230,230));
+        setBackground(new Color(235,230,230));
         setMinimumSize(new Dimension(460, 80));
         setPreferredSize(new Dimension(460, 80));
         setMaximumSize(new Dimension(460, 80));

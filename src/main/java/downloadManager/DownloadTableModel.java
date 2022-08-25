@@ -4,25 +4,30 @@
  */
 package downloadManager;
 
+import com.mycompany.belony.nduledownload.main.SerializerUtil;
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
-
 /**
  *
  * @author Jonathan Idy
  */
-public class DownloadTableModel implements Observer{
+public class DownloadTableModel {
     //These are the names for the tables's columns.
 	private static final String[] columnNames = {"title","Size","Progress","Status"};
         //The tables's list of download.
-	private ArrayList<Download> downloadList = new ArrayList<Download>();
+	private ArrayList<Download> downloadList;
+        public DownloadTableModel(){
+            ///Get the saved instance of downloadList if any
+            downloadList = SerializerUtil.deserializeDownloadList();
+            if(downloadList == null) downloadList = new ArrayList<Download>();
+        }
         //Add new download to the table.
 	public void addDownload(Download download){
             //Register to be notified when the download changes.
-            download.addObserver(this);
+            ///download.addObserver(this);
             downloadList.add(download);
-            ///Insert the download to the table
+            ///Save the state of the downloadList object 
+            ///This should be done everytime a download changes its state and notify us
+            saveInstanceState();///Serialize downloadList to local memory
         }
         public Download getDownload(int row){
             return downloadList.get(row);
@@ -54,8 +59,7 @@ public class DownloadTableModel implements Observer{
             return downloadList.size();
 	}
 
-    @Override
-    public void update(Observable o, Object arg) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        public void saveInstanceState() {
+            SerializerUtil.serializeDownloadList(downloadList);
     }
 }

@@ -4,12 +4,14 @@
  */
 package com.mycompany.belony.nduledownload.main;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Jonathan Idy
  */
 ////This represents a youtube video with all its informations
-public class Video {
+public class Video implements Serializable{
     public String id;
     public String title;
     public String channel;

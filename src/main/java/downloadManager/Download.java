@@ -12,6 +12,7 @@ import com.github.kiulian.downloader.model.videos.formats.Format;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
 import com.mycompany.belony.nduledownload.main.Video;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Observable;
 
@@ -19,7 +20,7 @@ import java.util.Observable;
  *
  * @author Jonathan Idy
  */
-public class Download extends Observable implements Runnable{
+public class Download extends Observable implements Runnable , Serializable{
 
 	public static final String STATUSES[]={"Downloading","Paused","Complete","Canceled","Error"};
 
@@ -31,9 +32,10 @@ public class Download extends Observable implements Runnable{
 
 	private final Long size;
 	private int status;
+        private boolean isRessourceVideo;
         private final String home = System.getProperty("user.home");
         private final String downloadFolder = home + "\\Downloads\\";
-        private final Format videoFormat;
+        private final transient Format videoFormat; ///not serializable
         private int progression = 0;
         private Video video;
         private final Date timeStamp;
@@ -43,7 +45,8 @@ public class Download extends Observable implements Runnable{
         this.video = video;
         timeStamp = new Date();///Time when the download was initiated
         size = videoFormat.contentLength();
-            status = DOWNLOADING;
+        status = DOWNLOADING;
+        isRessourceVideo =  videoFormat instanceof VideoFormat ? true:false;
            download();
 	}
         ///getters
@@ -69,7 +72,7 @@ public class Download extends Observable implements Runnable{
         return timeStamp;
     }
     public boolean isRessourceVideo(){ ///Whether it's an audio or video
-        return videoFormat instanceof VideoFormat ? true:false;
+        return isRessourceVideo;
     }
         ///actions
     public void pause(){

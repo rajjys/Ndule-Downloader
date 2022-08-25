@@ -11,6 +11,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.util.Observable;
 import java.util.Observer;
@@ -34,6 +36,7 @@ public class DownloadManagerWindow extends JDialog implements Observer{
     JScrollPane mainScrollPane;
     JPanel contentPanel;
     public DownloadManagerWindow(){
+        ///Get the saved instance of the dtModel if there is any
        dtModel = new DownloadTableModel();
        downloadPanel = new JPanel();
        downloadPanel.setLayout(new BoxLayout(downloadPanel, BoxLayout.PAGE_AXIS));
@@ -96,6 +99,10 @@ public class DownloadManagerWindow extends JDialog implements Observer{
     @Override
     public void update(Observable o, Object arg) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public void saveInstanceState() {
+        dtModel.saveInstanceState();
     }
     
 }

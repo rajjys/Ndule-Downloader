@@ -4,6 +4,7 @@
  */
 package com.mycompany.belony.nduledownload.main;
 
+import youtubeQuery.YoutubeRequestModel;
 import customViews.RoundJButton;
 import downloadManager.Download;
 import downloadManager.DownloadManagerWindow;
@@ -18,12 +19,14 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -40,19 +43,17 @@ import javax.swing.event.DocumentListener;
 public class MainWindow extends JFrame {
     ///Main Window components
     private JTextField queryField;
-    private JButton searchBtn;
-    private JButton menuBtn;
+    private final JButton menuBtn;
     private JPanel searchResultPanel;
-    private JPanel downloadsPanel;
-    private JPanel mainPanel;
-    private JScrollPane mainScrollPane;
-    private JLabel queryTypeLbl;
+    private final JPanel mainPanel;
+    private final JScrollPane mainScrollPane;
+    private final JLabel queryTypeLbl;
     private final ImageIcon yt_search_icon;
     private final ImageIcon yt_video_icon;
     private final ImageIcon menu_icon;
-    private YoutubeRequestModel ytModel;
-    private FormatChooserWindow formatChooser;
-    private DownloadManagerWindow dmPanel;
+    private final YoutubeRequestModel ytModel;
+    private final FormatChooserWindow formatChooser;
+    private final DownloadManagerWindow dmPanel;
     
     ///Constructor
     public MainWindow(){
@@ -74,7 +75,9 @@ public class MainWindow extends JFrame {
         ///Activate Events
         InitGUIEvents();
     }
-
+public void showWindow(){
+    setVisible(true);
+}
     ///Initialise Main window GUI components
     private void initGUIComponents() {
         ///Setting up JFrame 
@@ -142,15 +145,7 @@ public class MainWindow extends JFrame {
             container.add(component,gbc);
     }
     ///Hide this frame
-    public void hideWindow(){
-        setVisible(false);
-    }
-    ///Display this frame
-    public void showWindow(){
-        setVisible(true);
-    }
-    private void InitGUIEvents() {
-        
+    private void InitGUIEvents() { 
        ///queryField Focus Event
        queryField.addFocusListener(new FocusListener(){
        @Override
@@ -189,35 +184,57 @@ public class MainWindow extends JFrame {
        queryField.addActionListener((ActionEvent e) -> {
            String query = queryField.getText();
            ///Check the query nature. Either youtube download if valid youtube video or youtube search
-               if(!query.isBlank() && !query.isEmpty()) ///Assert it's not empty or otherwise blank
-               if(WebValidationUtil.isYoutubeVideo(query)){
-                  String videoId = WebValidationUtil.extractVideoID(query);
-                  ///Make video information request from youtube
-                  var video = ytModel.getVideoInfo(videoId);
-                  if(video == null){
-                      JOptionPane.showMessageDialog(this, "Could not find the video",
-                              "ERROR", JOptionPane.ERROR_MESSAGE);
-                      return;
-                  }
-                  else{
-                      ///Proceed to select the format
-                      formatChooser.setLocationRelativeTo(this);
-                      var selectedFormat = formatChooser.updateAndShow(video); 
-                      if(selectedFormat != null){
-                          ///Proceed to download
-                          var download = new Download(selectedFormat, video);
-                          dmPanel.actionAdd(download);
-                      }
-                  }
+           if (!query.isBlank() && !query.isEmpty()) {
+               if (WebValidationUtil.isYoutubeVideo(query)) {
+                   String videoId = WebValidationUtil.extractVideoID(query);
+                   ///Make video information request from youtube
+                   var video = ytModel.getVideoInfo(videoId);
+                   if (video == null) {
+                       JOptionPane.showMessageDialog(MainWindow.this, "Could not find the video", "ERROR", JOptionPane.ERROR_MESSAGE);
+                       return;
+                   } else {
+                       ///Proceed to select the format
+                       formatChooser.setLocationRelativeTo(MainWindow.this);
+                       var selectedFormat = formatChooser.updateAndShow(video);
+                       if(selectedFormat != null){
+                           ///Proceed to download
+                           var download = new Download(selectedFormat, video);
+                           dmPanel.actionAdd(download);
+                       }}
+               } 
+               else { ////Perform a youtube search
+                 var videoList = ytModel.getSearchResult(query);
+                 if(videoList != null){
+                 for(Video v : videoList){
+                     System.out.println(v.id);
+                     System.out.println(v.title);
+                     System.out.println(v.thumbnailLink);
+                     System.out.println(v.channel);
+                     System.out.println(v.releaseDate);
+                     System.out.println(v.viewCount);
+                     System.out.println(v.commentCount);
+                     System.out.println(v.duration);
+                     System.out.println();
+                 }
+                }
+                 else System.out.print("No videos found");
                }
-               else JOptionPane.showMessageDialog(this, "Youtube search",
-                                   "SEARCH", JOptionPane.ERROR_MESSAGE);
-               queryField.setText("");
+           }
+           queryField.setText("");
        });
        ///menuBtn actionlisteners
        menuBtn.addActionListener((ActionEvent e) -> {
            dmPanel.updateAndShow();
        });
+       addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                  ///Save the program state and check whether some download are still going
+                dmPanel.saveInstanceState();
+            }
+        });
 }
     
     public void updateQueryIcon(String query){
