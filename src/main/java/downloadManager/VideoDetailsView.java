@@ -17,29 +17,29 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import themes.ComponentCustomizer;
+import customViews.CustomComponent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.SwingWorker;
 
 /**
  *
  * @author Jonathan Idy
  */
-public class VideoDetailsView extends JPanel{
+public class VideoDetailsView extends JPanel implements Runnable{
 
     private ImageIcon vidThumbnailIcon;
     private Video video;
     
     public VideoDetailsView(Video video){
         this.video = video;
-        try{
-                    var imageLink = new URL(video.thumbnailLink);
-                    vidThumbnailIcon = new ImageIcon(ImageIO.read(imageLink));
-                } catch (MalformedURLException ex) {
-                    vidThumbnailIcon = new ImageIcon("assets/icons/default_thumbnail.png");
-                } catch (Exception ex) {
-                    
-                    vidThumbnailIcon = new ImageIcon("assets/icons/default_thumbnail.png");
-                }
+        
         initGUIComponents();
+        loadThumbnail();
     }
 
     private void initGUIComponents() {
@@ -47,17 +47,17 @@ public class VideoDetailsView extends JPanel{
         var title = video.title;
         if(title.length() > 50) title = title.substring(0, 50) + "...";
         var vidTitleLabel = new JLabel(title);
-        ComponentCustomizer.customizeLabel(vidTitleLabel, 1);
+        CustomComponent.customizeLabel(vidTitleLabel, 4);
         var vidViewsLabel = new JLabel(video.viewCount);
-        ComponentCustomizer.customizeLabel(vidViewsLabel, 1);
+        CustomComponent.customizeLabel(vidViewsLabel, 1);
         var vidChannelLabel = new JLabel(video.channel);
-        ComponentCustomizer.customizeLabel(vidChannelLabel, 1);
+        CustomComponent.customizeLabel(vidChannelLabel, 1);
         var vidDateLabel = new JLabel(video.releaseDate);
-        ComponentCustomizer.customizeLabel(vidDateLabel, 1);
+        CustomComponent.customizeLabel(vidDateLabel, 1);
         var vidDurationLabel = new JLabel(video.duration);
-        ComponentCustomizer.customizeLabel(vidDurationLabel, 1);
+        CustomComponent.customizeLabel(vidDurationLabel, 1);
         var vidCommentsLabel = new JLabel(video.commentCount);
-        ComponentCustomizer.customizeLabel(vidCommentsLabel, 1);
+        CustomComponent.customizeLabel(vidCommentsLabel, 1);
         
         var layout = new GridBagLayout();    
         var gbc = new GridBagConstraints();
@@ -78,7 +78,20 @@ public class VideoDetailsView extends JPanel{
         ///Add title label
         gbc.weightx = 1;
         addComponent(vidTitleLabel, this, layout,gbc, 0,6,2,2);
-        
+        ///Events config
+        addMouseListener(new MouseAdapter() {
+               
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    
+                }
+            });
     }
     public ImageIcon getThumbnail(){
         return vidThumbnailIcon;
@@ -99,4 +112,25 @@ public class VideoDetailsView extends JPanel{
         super.paintComponent(g);
         g.drawImage(vidThumbnailIcon.getImage(), 0, 0, this.getWidth(),this.getHeight(), null);
     }
+
+    @Override
+    public void run() {
+        try{
+                    var imageLink = new URL(video.thumbnailLink);
+                    vidThumbnailIcon = new ImageIcon(ImageIO.read(imageLink));
+                } catch (MalformedURLException ex) {
+                    vidThumbnailIcon = new ImageIcon("assets/icons/default_thumbnail.png");
+                } catch (Exception ex) {
+                    
+                    vidThumbnailIcon = new ImageIcon("assets/icons/default_thumbnail.png");
+                }
+        ///repaint();
+    }
+
+    void loadThumbnail() {
+        var t = new Thread(this);
+        t.start();
+    }
+    
+    
 }

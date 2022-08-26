@@ -6,9 +6,13 @@ package themes;
 
 import java.text.CharacterIterator;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
+import java.util.Date;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ocpsoft.prettytime.PrettyTime;
 
 /**
@@ -19,25 +23,35 @@ public class TextFormatUtil {
     
     ///DUration is given as PT01M34S56 and returned as 01:34:56
     public static String formatDuration(String duration){
-        String result = duration.replace("PT","").replace("H",":").replace("M",":").replace("S","");
-        String arr[]=result.split(":");
-        StringBuilder formattedTime;
-        if(arr.length == 1)
-            return String.format("%02d:%02d",0,
+        try{
+            String result = duration.replace("PT","").replace("H",":").replace("M",":").replace("S","");
+            String arr[]=result.split(":");
+            StringBuilder formattedTime;
+            if(arr.length == 1)
+                return String.format("%02d:%02d",0,
                     Integer.parseInt(arr[0]));
-        if(arr.length == 2)
-            return String.format("%02d:%02d", 
+            if(arr.length == 2)
+                return String.format("%02d:%02d", 
                     Integer.parseInt(arr[0]), 
                     Integer.parseInt(arr[1]));
-        return String.format("%d:%02d:%02d", Integer.parseInt(arr[0]), Integer.parseInt(arr[1]),Integer.parseInt(arr[2]));
-    }
+            return String.format("%d:%02d:%02d", Integer.parseInt(arr[0]), Integer.parseInt(arr[1]),Integer.parseInt(arr[2]));
+            }
+        catch(Exception e){
+            return "00:00";
+        }
+        }
     ///Date is given as a "2011-08-12T20:17:46.384Z" format and returned as "11 years Ago"
-    public static String formatPastTime(String timeStamp, String dateFormat) throws java.text.ParseException{
+    public static String formatPastTime(String timeStamp, String dateFormat){
         ///youtube date format: yyyy-MM-dd'T'HH:mm:ss'Z'
         ///windows date format: 
         DateFormat format = new SimpleDateFormat(dateFormat);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        var date = format.parse(timeStamp);
+        Date date = null;
+        try {
+            date = format.parse(timeStamp);
+        } catch (ParseException ex) {
+            Logger.getLogger(TextFormatUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
         var p = new PrettyTime(); ///Maven formatter library
         return p.format(date);
     }

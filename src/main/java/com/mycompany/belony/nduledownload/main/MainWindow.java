@@ -4,6 +4,8 @@
  */
 package com.mycompany.belony.nduledownload.main;
 
+import Utils.WebValidationUtil;
+import youtubeQuery.Constants;
 import youtubeQuery.YoutubeRequestModel;
 import customViews.RoundJButton;
 import downloadManager.Download;
@@ -22,8 +24,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -33,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -59,7 +66,12 @@ public class MainWindow extends JFrame {
     public MainWindow(){
 
             mainScrollPane = new JScrollPane();
+            mainScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);  
+            mainScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+       
             mainPanel = new JPanel();
+            searchResultPanel = new JPanel();
+            searchResultPanel.setLayout(new BoxLayout(searchResultPanel, BoxLayout.PAGE_AXIS));
             yt_search_icon = new ImageIcon("assets/icons/red_yt_search.png");
             yt_video_icon = new ImageIcon("assets/icons/yt_video.png");
             menu_icon = new ImageIcon("assets/icons/menu_dots.png");
@@ -181,46 +193,47 @@ public void showWindow(){
            }
        });
        ///Enter key pressed.
-       queryField.addActionListener((ActionEvent e) -> {
-           String query = queryField.getText();
-           ///Check the query nature. Either youtube download if valid youtube video or youtube search
-           if (!query.isBlank() && !query.isEmpty()) {
-               if (WebValidationUtil.isYoutubeVideo(query)) {
-                   String videoId = WebValidationUtil.extractVideoID(query);
-                   ///Make video information request from youtube
-                   var video = ytModel.getVideoInfo(videoId);
-                   if (video == null) {
-                       JOptionPane.showMessageDialog(MainWindow.this, "Could not find the video", "ERROR", JOptionPane.ERROR_MESSAGE);
-                       return;
-                   } else {
-                       ///Proceed to select the format
-                       formatChooser.setLocationRelativeTo(MainWindow.this);
-                       var selectedFormat = formatChooser.updateAndShow(video);
-                       if(selectedFormat != null){
-                           ///Proceed to download
-                           var download = new Download(selectedFormat, video);
-                           dmPanel.actionAdd(download);
-                       }}
-               } 
-               else { ////Perform a youtube search
-                 var videoList = ytModel.getSearchResult(query);
-                 if(videoList != null){
-                 for(Video v : videoList){
-                     System.out.println(v.id);
-                     System.out.println(v.title);
-                     System.out.println(v.thumbnailLink);
-                     System.out.println(v.channel);
-                     System.out.println(v.releaseDate);
-                     System.out.println(v.viewCount);
-                     System.out.println(v.commentCount);
-                     System.out.println(v.duration);
-                     System.out.println();
-                 }
-                }
-                 else System.out.print("No videos found");
+       queryField.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               String query = queryField.getText();
+               ///Check the query nature. Either youtube download if valid youtube video or youtube search
+               if (!query.isBlank() && !query.isEmpty()) {
+                   if (WebValidationUtil.isYoutubeVideo(query)) {
+                       String videoId = WebValidationUtil.extractVideoID(query);
+                       ///Make video information request from youtube
+                       var video = ytModel.getVideoInfo(videoId);
+                       if (video == null) {
+                           JOptionPane.showMessageDialog(MainWindow.this, "Could not find the video", "ERROR", JOptionPane.ERROR_MESSAGE);
+                           return;
+                       } else {
+                           selectDownloadFormat(video);
+                           queryField.setText("");
+                       }
+                   }
+                   else { ////Perform a youtube search
+                       var videoList = ytModel.getSearchResult(query);
+                       if(videoList != null){
+                           searchResultPanel.removeAll();
+                            for(var v : videoList){
+                                var itemView = new VideoItemView(v);
+                                itemView.addMouseListener(new MouseAdapter(){
+                                    public void mouseReleased(MouseEvent e) {
+                                        selectDownloadFormat(itemView.video);
+                                    }
+                                });
+                                searchResultPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+                                searchResultPanel.add(itemView);
+                            }
+                           mainScrollPane.setViewportView(searchResultPanel);
+                           mainScrollPane.getVerticalScrollBar().setValue(0);
+                           mainScrollPane.revalidate();
+                       }
+                       else System.out.print("No videos found");
+                   }
                }
+               
            }
-           queryField.setText("");
        });
        ///menuBtn actionlisteners
        menuBtn.addActionListener((ActionEvent e) -> {
@@ -235,7 +248,7 @@ public void showWindow(){
                 dmPanel.saveInstanceState();
             }
         });
-}
+     }
     
     public void updateQueryIcon(String query){
         if(WebValidationUtil.isYoutubeVideo(query)){
@@ -247,4 +260,22 @@ public void showWindow(){
             queryTypeLbl.setIcon(yt_search_icon);
         }
     }
+    public  void selectDownloadFormat(Video video){
+        ///Proceed to select the format
+                           formatChooser.setLocationRelativeTo(MainWindow.this);
+                           var selectedFormat = formatChooser.updateAndShow(video);
+                           if(selectedFormat != null){
+                               ///Proceed to download
+                               var download = new Download(selectedFormat, video);
+                               dmPanel.actionAdd(download);
+                            }
+    }
+    class MouseAdapterMod extends MouseAdapter {
+
+   // usually better off with mousePressed rather than clicked
+   public void mousePressed(MouseEvent e) {
+       VideoItemView itemView = (VideoItemView)e.getSource();
+       System.out.println(itemView.video.title);
+   }
+}
 }

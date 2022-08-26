@@ -22,7 +22,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import themes.ComponentCustomizer;
+import customViews.CustomComponent;
 import themes.TextFormatUtil;
 
 /**
@@ -43,7 +43,7 @@ public class DownloadItemView extends JPanel implements Observer{
     Download d;
     ImageIcon videoFileIcon, audioFileIcon;
     ImageIcon pauseIcon, resumeIcon, removeIcon;
-    public DownloadItemView(Download d) throws ParseException{
+    public DownloadItemView(Download d){
         this.d = d;
         d.addObserver(this);
         videoFileIcon = new ImageIcon("assets/icons/video_file32.png");
@@ -53,21 +53,18 @@ public class DownloadItemView extends JPanel implements Observer{
         removeIcon = new ImageIcon("assets/icons/remove_icon.png");
         
         var title = d.getTitle();
-        if(title.length() > 50) title = title.substring(0, 50) + "...";
+        if(title.length() > 50) title = title.substring(0, 47) + "...";
         titleLabel = new JLabel(title);
-        ComponentCustomizer.customizeLabel(titleLabel, 2);
-        titleLabel.setFont(new Font("Sans Serif", Font.BOLD,12));
-        titleLabel.setForeground(new Color(50,50,50));
-        titleLabel.setBorder(BorderFactory.createLineBorder(Color.gray.brighter()));
+        CustomComponent.customizeLabel(titleLabel, 3);
         durationLabel = new JLabel(d.getDuration());
-        ComponentCustomizer.customizeLabel(durationLabel, 2);
+        CustomComponent.customizeLabel(durationLabel, 2);
         sizeLabel = new JLabel(TextFormatUtil.formatSizeBytes(d.getSize()));
-        ComponentCustomizer.customizeLabel(sizeLabel, 2);
+        CustomComponent.customizeLabel(sizeLabel, 2);
         locationLabel = new JLabel(d.getPath());
-        ComponentCustomizer.customizeLabel(locationLabel, 2);
+        CustomComponent.customizeLabel(locationLabel, 2);
         var date = d.getTimeStamp().toString();
         downDateLabel = new JLabel(TextFormatUtil.formatPastTime(date, "EEE MMM dd HH:mm:ss zzzz yyyy"));
-        ComponentCustomizer.customizeLabel(downDateLabel, 2);
+        CustomComponent.customizeLabel(downDateLabel, 2);
         ////Pick icon according to type
         if(d.isRessourceVideo()) thumbLabel = new JLabel(videoFileIcon);
         else thumbLabel = new JLabel(audioFileIcon);

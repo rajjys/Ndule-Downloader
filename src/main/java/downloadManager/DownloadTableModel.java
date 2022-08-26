@@ -4,7 +4,7 @@
  */
 package downloadManager;
 
-import com.mycompany.belony.nduledownload.main.SerializerUtil;
+import Utils.SerializerUtil;
 import java.util.ArrayList;
 /**
  *

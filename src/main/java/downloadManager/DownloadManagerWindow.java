@@ -33,8 +33,8 @@ public class DownloadManagerWindow extends JDialog implements Observer{
 
     DownloadTableModel dtModel; ///to be Serialized
     private JPanel downloadPanel;
-    JScrollPane mainScrollPane;
-    JPanel contentPanel;
+    private JScrollPane mainScrollPane;
+    private JPanel contentPanel;
     public DownloadManagerWindow(){
         ///Get the saved instance of the dtModel if there is any
        dtModel = new DownloadTableModel();
@@ -61,7 +61,6 @@ public class DownloadManagerWindow extends JDialog implements Observer{
        setResizable(false);
        setPreferredSize(new Dimension(500,380));
        setTitle("Downloads");
-        
         pack();
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice defaultScreen = ge.getDefaultScreenDevice();
@@ -75,15 +74,10 @@ public class DownloadManagerWindow extends JDialog implements Observer{
         downloadPanel.removeAll();
         for(int i  = size - 1; i >= 0; i--){
             ///Create downloadItemView for each download and add it to the panel
-            DownloadItemView downloadItem = null;
-            try {
-                downloadItem = new DownloadItemView(dtModel.getDownload(i));
-            } catch (ParseException ex) {
-                Logger.getLogger(DownloadManagerWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            var downloadItem = new DownloadItemView(dtModel.getDownload(i));
+           
             downloadPanel.add(Box.createRigidArea(new Dimension(0, 5)));
             downloadPanel.add(downloadItem);
-            System.out.println("video " + i + ": " + downloadItem.titleLabel.getText());
         }
         mainScrollPane.setViewportView(downloadPanel);
         mainScrollPane.getVerticalScrollBar().setValue(0);

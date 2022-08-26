@@ -5,13 +5,15 @@
 package youtubeQuery;
 
 ///import com.alibaba.fastjson.JSONObject;
-import com.mycompany.belony.nduledownload.main.APIKey;
 import com.mycompany.belony.nduledownload.main.Video;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -47,8 +49,14 @@ public class YoutubeRequestModel {
     public ArrayList<Video> getSearchResult(String searchQuery){
         ///Empty previous content
         videoList.clear();
+        String encodedQuery;
+        try {
+            encodedQuery = URLEncoder.encode(searchQuery, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            encodedQuery = searchQuery;
+        }
         var builder = new StringBuilder(ytSearchRequest);
-        builder.append("&q=" + searchQuery);
+        builder.append("&q=" + encodedQuery);
         var query = builder.toString();
         ///Make an http request and get the json response
         var response = makeRequest(query);
@@ -62,7 +70,6 @@ public class YoutubeRequestModel {
                 builder.append(v.id);
                 builder.append(",");
             }
-            System.out.println(builder.toString());
           var detailsResponse = makeRequest(builder.toString());
           parseUpdateSearchResult(detailsResponse);
           return videoList;
@@ -133,8 +140,6 @@ public class YoutubeRequestModel {
             else return null;
         } catch (ParseException ex) {
             return null;
-        } catch (java.text.ParseException ex) {
-            Logger.getLogger(YoutubeRequestModel.class.getName()).log(Level.SEVERE, null, ex);
         }
         return v;
     }
@@ -164,8 +169,6 @@ public class YoutubeRequestModel {
             }
            return videoList;
         } catch (ParseException ex) {
-            Logger.getLogger(YoutubeRequestModel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (java.text.ParseException ex) {
             Logger.getLogger(YoutubeRequestModel.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
