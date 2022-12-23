@@ -14,6 +14,7 @@ import javax.swing.JProgressBar;
 import customViews.CustomComponent;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
@@ -46,16 +47,24 @@ public class VideoItemView extends JPanel implements Runnable{
     ///ImageIcon pauseIcon, resumeIcon, removeIcon;
     public VideoItemView(Video v){
         video = v;
+        
+        ///setBorder(BorderFactory.createLineBorder(new Color(160,128,128)));
+        setOpaque(true);
+        setDefaultBackground();
+        setMinimumSize(new Dimension(460, 70));
+        setPreferredSize(new Dimension(470, 80));
+        setMaximumSize(new Dimension(480, 80));
+        
         thumbnailURL = v.thumbnailLink;
         thumbnailLabel = new JLabel();
-        thumbnailLabel.setMinimumSize(new Dimension(130, 70));
+        thumbnailLabel.setMinimumSize(new Dimension(130, 78));
         thumbnailLabel.setPreferredSize(new Dimension(150,80));
         thumbnailLabel.setMaximumSize(new Dimension(150,80));
         vidThumbnailIcon = new ImageIcon();
         var title = v.title;
         if(title.length() > 50) title = title.substring(0, 47) + "...";
         titleLabel = new JLabel(title);
-        System.out.println(title);
+        ///System.out.println(title);
         CustomComponent.customizeLabel(titleLabel, 3);
         durationLabel = new JLabel(v.duration);
         CustomComponent.customizeLabel(durationLabel, 1);
@@ -85,14 +94,17 @@ public class VideoItemView extends JPanel implements Runnable{
         gbc.anchor = GridBagConstraints.CENTER;
         addComponent(viewCountLabel, this, layout, gbc, 2, 2, 1, 1, 0, 0);
         addComponent(commentCountLabel, this, layout, gbc, 3, 2, 1, 1, 0, 0);
-        setBorder(BorderFactory.createLineBorder(new Color(160,128,128)));
-        setOpaque(true);
-        setBackground(new Color(235,230,230));
         ///load the thumbnail
         loadThumnail();
     }
-
-    
+    public void setDefaultBackground(){
+        setBackground(new Color(220,215,215));
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    }
+    public void setMouseHoverBackground(){
+        setBackground(new Color(190,185,185));
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
     @Override
     public void run() {
         try{

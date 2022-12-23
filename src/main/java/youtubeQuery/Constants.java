@@ -9,5 +9,5 @@ package youtubeQuery;
  * @author Jonathan Idy
  */
 public class Constants {
-    public static String defaultSearch = "Youtube Search or Type URL";
+    public static String defaultSearch = "Youtube Search or Type URL Here";
 }

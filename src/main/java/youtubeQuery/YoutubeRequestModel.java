@@ -7,12 +7,15 @@ package youtubeQuery;
 ///import com.alibaba.fastjson.JSONObject;
 import com.mycompany.belony.nduledownload.main.Video;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -61,6 +64,14 @@ public class YoutubeRequestModel {
         ///Make an http request and get the json response
         var response = makeRequest(query);
          if(response != null){
+              ///Save result to file
+                try (PrintWriter out = new PrintWriter("response.txt")) {
+                    ///out.println("");
+                    out.append(response.toString());
+                } catch (FileNotFoundException ex) {
+                Logger.getLogger(YoutubeRequestModel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+                
             var videoList = parseSearchResult(response);
             ///Get content details(duration) and statistics(Views and)
             ///get the videoId of all videos and concatenate to make one request only
@@ -82,10 +93,10 @@ public class YoutubeRequestModel {
             var connection = (HttpURLConnection) obj.openConnection();
             var responseCode = connection.getResponseCode();
             if(responseCode == HttpURLConnection.HTTP_OK){
-                
+                Charset utfCharset = Charset.forName("UTF8");
                 var reader = new BufferedReader(
                              new InputStreamReader(
-                                connection.getInputStream()));
+                                connection.getInputStream(), utfCharset));
                 var inputLine = new String();
                 var response = new StringBuffer();
                 while((inputLine = reader.readLine()) != null){
@@ -160,6 +171,7 @@ public class YoutubeRequestModel {
                 var date = (String)snippetObject.get("publishedAt");
                 v.releaseDate = TextFormatUtil.formatPastTime(date, "yyyy-MM-dd'T'HH:mm:ss'Z'");
                 v.title = (String)snippetObject.get("title");
+                System.out.println((String)snippetObject.get("title"));
                 v.description = (String)snippetObject.get("description");
                 v.channel = (String)snippetObject.get("channelTitle");
                 var thumbnails = (JSONObject)snippetObject.get("thumbnails");
@@ -173,7 +185,7 @@ public class YoutubeRequestModel {
         }
         return null;
     }
-
+////To update the search result items by adding missing informations
     private void parseUpdateSearchResult(String detailsResponse) {
         var parser = new JSONParser();
         try{

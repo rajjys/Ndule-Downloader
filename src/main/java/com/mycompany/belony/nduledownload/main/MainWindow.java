@@ -1,4 +1,4 @@
-/*
+ /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
@@ -21,7 +21,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
@@ -35,8 +34,10 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
@@ -51,17 +52,21 @@ public class MainWindow extends JFrame {
     ///Main Window components
     private JTextField queryField;
     private final JButton menuBtn;
-    private JPanel searchResultPanel;
+    private final JButton hideBtn;
+    private final JPopupMenu menuBar;
+    private final JMenuItem downloadsItem, settingsItem, exitItem;
+    private final JPanel searchResultPanel;
     private final JPanel mainPanel;
     private final JScrollPane mainScrollPane;
     private final JLabel queryTypeLbl;
     private final ImageIcon yt_search_icon;
     private final ImageIcon yt_video_icon;
     private final ImageIcon menu_icon;
+    private final ImageIcon hide_icon;
     private final YoutubeRequestModel ytModel;
     private final FormatChooserWindow formatChooser;
     private final DownloadManagerWindow dmPanel;
-    
+    private boolean isSearchPanelVisible;
     ///Constructor
     public MainWindow(){
 
@@ -75,9 +80,15 @@ public class MainWindow extends JFrame {
             yt_search_icon = new ImageIcon("assets/icons/red_yt_search.png");
             yt_video_icon = new ImageIcon("assets/icons/yt_video.png");
             menu_icon = new ImageIcon("assets/icons/menu_dots.png");
+            hide_icon = new ImageIcon("assets/icons/hide_icon.png");
                     ///Init variables
             queryTypeLbl = new JLabel();
             menuBtn = new RoundJButton(menu_icon);
+            hideBtn = new JButton(hide_icon);
+            menuBar = new JPopupMenu();
+            downloadsItem = new JMenuItem("Downloads");
+            settingsItem = new JMenuItem("Settings");
+            exitItem = new JMenuItem("Exit");
             ytModel = new YoutubeRequestModel();
             formatChooser = new FormatChooserWindow();
             dmPanel = new DownloadManagerWindow();
@@ -94,7 +105,6 @@ public void showWindow(){
     private void initGUIComponents() {
         ///Setting up JFrame 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(500, 380)); ///defaul
         ///setLayout(new GridBagLayout());
         setUndecorated(true); ///remove the title bar
         ///Set program icon
@@ -108,8 +118,11 @@ public void showWindow(){
         queryField.setFont(new Font("Roboto", Font.PLAIN, 14));
         queryField.setMinimumSize(queryField.getPreferredSize());
         queryField.setMargin(new Insets(0,8,0,8));
-        ///Customize the menu button
-        
+        ///Customize the hide button
+        hideBtn.setText("Hide");
+        hideBtn.setPreferredSize(new Dimension(this.getWidth(), 12));
+        hideBtn.setMaximumSize(new Dimension(this.getWidth(), 12));
+        hideBtn.setFocusable(false);
         ///Adding component to the main panel
         var layout = new GridBagLayout();
         mainPanel.setLayout(layout);
@@ -129,11 +142,22 @@ public void showWindow(){
         c.fill = GridBagConstraints.NONE;
         c.insets = new Insets(6,1,6,1);
         addComponent(menuBtn, mainPanel, layout, c, 2,0,1,1,0,0);
+        ///Constraints for the addButton
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(0,0,0,0);
+        addComponent(hideBtn, mainPanel, layout, c, 0, 1, 3, 1,0,0);
         ///Constraints for the mainScrollPane
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(1,1,1,1);
-        addComponent(mainScrollPane, mainPanel, layout, c, 0,1,3,1,1,1);
+        addComponent(mainScrollPane, mainPanel, layout, c, 0,2,3,1,1,1);
         add(mainPanel);///Add the main panel to the main window
+        ///Adding menuItems to the menu
+        menuBar.add(downloadsItem);
+        menuBar.add(settingsItem);
+        menuBar.add(exitItem);
+                
+        isSearchPanelVisible = false;
+        setSearchPanelVisible(false);
         pack();
         ///Position window at the top right corner upon startup
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -193,52 +217,74 @@ public void showWindow(){
            }
        });
        ///Enter key pressed.
-       queryField.addActionListener(new ActionListener() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-               String query = queryField.getText();
-               ///Check the query nature. Either youtube download if valid youtube video or youtube search
-               if (!query.isBlank() && !query.isEmpty()) {
-                   if (WebValidationUtil.isYoutubeVideo(query)) {
-                       String videoId = WebValidationUtil.extractVideoID(query);
-                       ///Make video information request from youtube
-                       var video = ytModel.getVideoInfo(videoId);
-                       if (video == null) {
-                           JOptionPane.showMessageDialog(MainWindow.this, "Could not find the video", "ERROR", JOptionPane.ERROR_MESSAGE);
-                           return;
-                       } else {
-                           selectDownloadFormat(video);
-                           queryField.setText("");
-                       }
-                   }
-                   else { ////Perform a youtube search
-                       var videoList = ytModel.getSearchResult(query);
-                       if(videoList != null){
-                           searchResultPanel.removeAll();
-                            for(var v : videoList){
-                                var itemView = new VideoItemView(v);
-                                itemView.addMouseListener(new MouseAdapter(){
-                                    public void mouseReleased(MouseEvent e) {
-                                        selectDownloadFormat(itemView.video);
-                                    }
-                                });
-                                searchResultPanel.add(Box.createRigidArea(new Dimension(0, 8)));
-                                searchResultPanel.add(itemView);
-                            }
-                           mainScrollPane.setViewportView(searchResultPanel);
-                           mainScrollPane.getVerticalScrollBar().setValue(0);
-                           mainScrollPane.revalidate();
-                       }
-                       else System.out.print("No videos found");
+       queryField.addActionListener((var e) -> {
+           String query = queryField.getText();
+           ///Check the query nature. Either youtube download if valid youtube video or youtube search
+           if (!query.isBlank() && !query.isEmpty()) {
+               if (WebValidationUtil.isYoutubeVideo(query)) {
+                   String videoId = WebValidationUtil.extractVideoID(query);
+                   ///Make video information request from youtube
+                   var video = ytModel.getVideoInfo(videoId);
+                   if (video == null) {
+                       JOptionPane.showMessageDialog(MainWindow.this, "Could not find the video", "ERROR", JOptionPane.ERROR_MESSAGE);
+                   } else {
+                       selectDownloadFormat(video);
+                       queryField.setText("");
                    }
                }
-               
+               else { ////Perform a youtube search
+                   ///Unhide the content panel if hidden
+                   if(!isSearchPanelVisible);
+                   setSearchPanelVisible(true);
+                   var videoList = ytModel.getSearchResult(query);
+                   if(videoList != null){
+                       searchResultPanel.removeAll();
+                       for(var v : videoList){
+                           var itemView = new VideoItemView(v);
+                           itemView.addMouseListener(new MouseAdapter(){
+                               @Override
+                               public void mouseReleased(MouseEvent e) {
+                                   selectDownloadFormat(itemView.video);
+                               }
+                               @Override
+                               public void mouseEntered(MouseEvent e){
+                                   itemView.setMouseHoverBackground();
+                               }
+                               @Override
+                               public void mouseExited(MouseEvent e){
+                                   itemView.setDefaultBackground();
+                               }
+                           });
+                           searchResultPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+                           searchResultPanel.add(itemView);
+                       }
+                       mainScrollPane.setViewportView(searchResultPanel);
+                       mainScrollPane.getVerticalScrollBar().setValue(0);
+                       mainScrollPane.revalidate();
+                   }
+                   else System.out.print("No videos found");
+               }
            }
        });
-       ///menuBtn actionlisteners
+       ///menuBtn and menuItems actionlisteners
        menuBtn.addActionListener((ActionEvent e) -> {
+       });
+       ///
+       downloadsItem.addActionListener((ActionEvent e) -> {
            dmPanel.updateAndShow();
        });
+       exitItem.addActionListener((ActionEvent e) -> {
+           dmPanel.saveInstanceState();
+           System.exit(0);
+       });
+       menuBtn.addMouseListener(new MouseAdapter() {
+        public void mouseReleased(MouseEvent e){
+            if ( e.getButton() == 1 ){ // 1-left, 2-middle, 3-right button
+                menuBar.show(e.getComponent(), e.getX(), e.getY());
+            }
+        }
+    });
+       ///Window related
        addWindowListener(new WindowAdapter()
         {
             @Override
@@ -248,6 +294,11 @@ public void showWindow(){
                 dmPanel.saveInstanceState();
             }
         });
+       ///Button to hide the search result
+       hideBtn.addActionListener((ActionEvent e) -> {
+           isSearchPanelVisible = false;
+           setSearchPanelVisible(false);
+       });
      }
     
     public void updateQueryIcon(String query){
@@ -270,12 +321,28 @@ public void showWindow(){
                                dmPanel.actionAdd(download);
                             }
     }
-    class MouseAdapterMod extends MouseAdapter {
-
-   // usually better off with mousePressed rather than clicked
-   public void mousePressed(MouseEvent e) {
-       VideoItemView itemView = (VideoItemView)e.getSource();
-       System.out.println(itemView.video.title);
-   }
-}
+    public void setSearchPanelVisible(boolean setVisible){
+        if(setVisible){
+            ///Set it visible
+            ///isSearchPanelVisible = true;
+            hideBtn.setVisible(true);
+            mainScrollPane.setVisible(true);
+            setMinimumSize(new Dimension(500,400));
+            setPreferredSize(new Dimension(500, 400)); ///default
+            setMaximumSize(new Dimension(500, 400));
+            mainPanel.revalidate();
+            pack();
+        }
+        else{
+            ///Hide search panel
+           /// isSearchPanelVisible = false;
+            hideBtn.setVisible(false);
+            mainScrollPane.setVisible(false);
+            setMinimumSize(new Dimension(500,32));
+            setPreferredSize(new Dimension(500, 32)); ///default
+            setMaximumSize(new Dimension(500, 32));
+            mainPanel.revalidate();
+            pack();
+        }
+    }
 }

@@ -8,11 +8,9 @@ import customViews.RoundJButton;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.text.ParseException;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.BorderFactory;
@@ -23,14 +21,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import customViews.CustomComponent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import themes.TextFormatUtil;
 
 /**
  *
  * @author Jonathan Idy
  */
-public class DownloadItemView extends JPanel implements Observer{
-    
+public class DownloadItemView extends JPanel implements PropertyChangeListener{    
     JLabel thumbLabel;
     JLabel titleLabel;
     JLabel durationLabel;
@@ -43,9 +42,11 @@ public class DownloadItemView extends JPanel implements Observer{
     Download d;
     ImageIcon videoFileIcon, audioFileIcon;
     ImageIcon pauseIcon, resumeIcon, removeIcon;
+    
     public DownloadItemView(Download d){
         this.d = d;
-        d.addObserver(this);
+        d.addPropertyChangeListener(this);
+        
         videoFileIcon = new ImageIcon("assets/icons/video_file32.png");
         audioFileIcon = new ImageIcon("assets/icons/audio_file32.png");
         pauseIcon = new ImageIcon("assets/icons/pause_icon.png");
@@ -134,9 +135,10 @@ public class DownloadItemView extends JPanel implements Observer{
             gbc.insets = new Insets(1,1,1,1);
             container.add(component,gbc);
     }
+
     @Override
-    public void update(Observable o, Object arg) {
-        jpb.setValue(d.getProgress());
-    }
-    
+    public void propertyChange(PropertyChangeEvent evt) {
+        var  newValue = d.getProgress();
+        System.out.println("Progress: " + newValue);
+        jpb.setValue(newValue); }
 }

@@ -11,16 +11,16 @@ import com.github.kiulian.downloader.downloader.response.Response;
 import com.github.kiulian.downloader.model.videos.formats.Format;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
 import com.mycompany.belony.nduledownload.main.Video;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Observable;
-
 /**
  *
  * @author Jonathan Idy
  */
-public class Download extends Observable implements Runnable , Serializable{
+public class Download implements Runnable , Serializable{
 
 	public static final String STATUSES[]={"Downloading","Paused","Complete","Canceled","Error"};
 
@@ -32,13 +32,15 @@ public class Download extends Observable implements Runnable , Serializable{
 
 	private final Long size;
 	private int status;
-        private boolean isRessourceVideo;
+        private final boolean isRessourceVideo;
         private final String home = System.getProperty("user.home");
         private final String downloadFolder = home + "\\Downloads\\";
         private final transient Format videoFormat; ///not serializable
         private int progression = 0;
         private Video video;
         private final Date timeStamp;
+        
+        private PropertyChangeSupport support;
         
     public Download(Format videoFormat, Video video){
         this.videoFormat = videoFormat;
@@ -47,6 +49,7 @@ public class Download extends Observable implements Runnable , Serializable{
         size = videoFormat.contentLength();
         status = DOWNLOADING;
         isRessourceVideo =  videoFormat instanceof VideoFormat ? true:false;
+        support = new PropertyChangeSupport(this);
            download();
 	}
         ///getters
@@ -108,15 +111,15 @@ public class Download extends Observable implements Runnable , Serializable{
                 ///notify observers on change
                 status = DOWNLOADING;
                 progression = progress;
-                ///stateChanged();
-                System.out.printf("Downloaded %d%%\n", progress);
+                stateChanged();
+                ///System.out.printf("Downloaded %d%%\n", progress);
             }
     
             @Override
             public void onFinished(File videoInfo) {
                 ///Move file to download folder
                status = COMPLETE;
-              // stateChanged();
+                stateChanged();
                 System.out.println("Finished file: " + videoInfo);
             }
     
@@ -133,10 +136,16 @@ public class Download extends Observable implements Runnable , Serializable{
         System.out.println("Got here too");
     }
     
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl) {
+        support.removePropertyChangeListener(pcl);
+    }
     ///updater
-    private void stateChanged(){
-	setChanged();
-	notifyObservers();
-	}
-    
+    public void stateChanged(){
+        ////System.out.println("Progress: " + getProgress());
+        support.firePropertyChange("progress", progression - 1, progression);   
+    }
 }

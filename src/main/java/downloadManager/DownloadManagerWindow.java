@@ -11,13 +11,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.text.ParseException;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
@@ -66,7 +61,7 @@ public class DownloadManagerWindow extends JDialog implements Observer{
         GraphicsDevice defaultScreen = ge.getDefaultScreenDevice();
         Rectangle rect = defaultScreen.getDefaultConfiguration().getBounds();
         int x = (int) rect.getMaxX() - getWidth();
-        int y = 100;
+        int y = 15;
         setLocation(x, y);
     }
     public void updateContent(){
@@ -76,7 +71,7 @@ public class DownloadManagerWindow extends JDialog implements Observer{
             ///Create downloadItemView for each download and add it to the panel
             var downloadItem = new DownloadItemView(dtModel.getDownload(i));
            
-            downloadPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+            downloadPanel.add(Box.createRigidArea(new Dimension(0, 8)));
             downloadPanel.add(downloadItem);
         }
         mainScrollPane.setViewportView(downloadPanel);

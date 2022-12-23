@@ -38,15 +38,15 @@ public class CustomComponent {
     }
     private static void customizeLabelStyle2(JLabel label){
         ///Grey text color with no background
-        var courrier = new Font("Sans Serif", Font.PLAIN,10);
+        var courrier = new Font("SansSerif", Font.PLAIN,10);
         label.setFont(courrier);
-        label.setForeground(new Color(128, 128,128));
+        label.setForeground(new Color(5, 75,40));
         label.setBorder(new EmptyBorder(2,4,2,4));
         
     }
     private static void customizeLabelStyle3(JLabel label){
         ///Darker text with no background and bigger font for titles
-        label.setFont(new Font("Sans Serif", Font.BOLD,12));
+        label.setFont(new Font("SansSerif", Font.BOLD,12));
         label.setForeground(new Color(50,50,50));
         label.setBorder(BorderFactory.createLineBorder(Color.gray.brighter()));
     }

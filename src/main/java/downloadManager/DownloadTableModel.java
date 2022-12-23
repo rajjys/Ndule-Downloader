@@ -5,12 +5,14 @@
 package downloadManager;
 
 import Utils.SerializerUtil;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 /**
  *
  * @author Jonathan Idy
  */
-public class DownloadTableModel {
+public class DownloadTableModel implements PropertyChangeListener{
     //These are the names for the tables's columns.
 	private static final String[] columnNames = {"title","Size","Progress","Status"};
         //The tables's list of download.
@@ -23,7 +25,7 @@ public class DownloadTableModel {
         //Add new download to the table.
 	public void addDownload(Download download){
             //Register to be notified when the download changes.
-            ///download.addObserver(this);
+            download.addPropertyChangeListener(this);
             downloadList.add(download);
             ///Save the state of the downloadList object 
             ///This should be done everytime a download changes its state and notify us
@@ -61,5 +63,10 @@ public class DownloadTableModel {
 
         public void saveInstanceState() {
             SerializerUtil.serializeDownloadList(downloadList);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        ///System.out.println("downloading: " + evt.getNewValue());
     }
 }
