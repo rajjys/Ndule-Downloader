@@ -4,14 +4,12 @@
  */
 package com.mycompany.belony.nduledownload.main;
 
-import downloadManager.Download;
 import java.awt.Dimension;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import customViews.CustomComponent;
+import customViews.ComponentCustomizer;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -23,7 +21,6 @@ import java.awt.Insets;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 
 /**
@@ -39,7 +36,6 @@ public class VideoItemView extends JPanel implements Runnable{
     JLabel viewCountLabel;
     JLabel commentCountLabel;
     JLabel channelLabel;
-    JButton downloadButton;
     String thumbnailURL;
     private ImageIcon vidThumbnailIcon;
     Video video;
@@ -65,19 +61,19 @@ public class VideoItemView extends JPanel implements Runnable{
         if(title.length() > 50) title = title.substring(0, 47) + "...";
         titleLabel = new JLabel(title);
         ///System.out.println(title);
-        CustomComponent.customizeLabel(titleLabel, 3);
+        ComponentCustomizer.customizeLabel(titleLabel, 3);
         durationLabel = new JLabel(v.duration);
-        CustomComponent.customizeLabel(durationLabel, 1);
+        ComponentCustomizer.customizeLabel(durationLabel, 1);
         downDateLabel = new JLabel(v.releaseDate);
-        CustomComponent.customizeLabel(downDateLabel, 2);
+        ComponentCustomizer.customizeLabel(downDateLabel, 2);
         viewCountLabel = new JLabel(v.viewCount + " Views");
-        CustomComponent.customizeLabel(viewCountLabel, 2);
+        ComponentCustomizer.customizeLabel(viewCountLabel, 2);
         commentCountLabel = new JLabel(v.commentCount + " Comments");
-        CustomComponent.customizeLabel(commentCountLabel, 2);
+        ComponentCustomizer.customizeLabel(commentCountLabel, 2);
         var channel = v.channel;
         if(channel.length() > 20) channel = channel.substring(0, 17) + "...";
-        channelLabel = new JLabel(v.channel);
-        CustomComponent.customizeLabel(channelLabel, 2);
+        channelLabel = new JLabel(channel);
+        ComponentCustomizer.customizeLabel(channelLabel, 2);
         ///add components
         
         var layout = new GridBagLayout();

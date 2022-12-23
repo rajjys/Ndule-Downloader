@@ -141,6 +141,23 @@ public class FormatChooserWindow extends JDialog implements ActionListener{
             });
             // get audio formats
             List<AudioFormat> audioFormats = videoInfo.audioFormats();
+            ///Sort the audioFormats List
+            // One by one move boundary of unsorted subarray
+        for (int i = 0; i < audioFormats.size() - 1 ; i++)
+        {
+            // Find the minimum element in unsorted array
+            int min_idx = i;
+            for (int j = i + 1; j < audioFormats.size(); j++)
+                if (audioFormats.get(j).averageBitrate() < audioFormats.get(min_idx).averageBitrate())
+                    min_idx = j;
+ 
+            // Swap the found minimum element with the first
+            // element
+            var temp = audioFormats.get(min_idx);
+            audioFormats.set(min_idx, audioFormats.get(i));
+            audioFormats.set(i, temp);
+        }
+            
             audioFormats.forEach(it -> {
                 var option = new FormatRadioButton(it);
                 option.addActionListener(this);

@@ -16,9 +16,9 @@ import javax.swing.JButton;
  *
  * @author Jonathan Idy
  */
-public class RoundJButton extends JButton {
+public class RoundedJButton extends JButton {
     ImageIcon icon;
-     public RoundJButton(ImageIcon icon) {
+     public RoundedJButton(ImageIcon icon) {
     super();
     this.icon = icon;
     setBackground(Color.white);

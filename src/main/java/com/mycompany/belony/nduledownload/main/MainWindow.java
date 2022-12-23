@@ -7,7 +7,7 @@ package com.mycompany.belony.nduledownload.main;
 import Utils.WebValidationUtil;
 import youtubeQuery.Constants;
 import youtubeQuery.YoutubeRequestModel;
-import customViews.RoundJButton;
+import customViews.RoundedJButton;
 import downloadManager.Download;
 import downloadManager.DownloadManagerWindow;
 import downloadManager.FormatChooserWindow;
@@ -83,7 +83,7 @@ public class MainWindow extends JFrame {
             hide_icon = new ImageIcon("assets/icons/hide_icon.png");
                     ///Init variables
             queryTypeLbl = new JLabel();
-            menuBtn = new RoundJButton(menu_icon);
+            menuBtn = new RoundedJButton(menu_icon);
             hideBtn = new JButton(hide_icon);
             menuBar = new JPopupMenu();
             downloadsItem = new JMenuItem("Downloads");

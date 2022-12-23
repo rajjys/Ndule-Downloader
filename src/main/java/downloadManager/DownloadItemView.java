@@ -4,7 +4,7 @@
  */
 package downloadManager;
 
-import customViews.RoundJButton;
+import customViews.RoundedJButton;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -20,7 +20,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import customViews.CustomComponent;
+import customViews.ComponentCustomizer;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import themes.TextFormatUtil;
@@ -56,24 +56,24 @@ public class DownloadItemView extends JPanel implements PropertyChangeListener{
         var title = d.getTitle();
         if(title.length() > 50) title = title.substring(0, 47) + "...";
         titleLabel = new JLabel(title);
-        CustomComponent.customizeLabel(titleLabel, 3);
+        ComponentCustomizer.customizeLabel(titleLabel, 3);
         durationLabel = new JLabel(d.getDuration());
-        CustomComponent.customizeLabel(durationLabel, 2);
+        ComponentCustomizer.customizeLabel(durationLabel, 2);
         sizeLabel = new JLabel(TextFormatUtil.formatSizeBytes(d.getSize()));
-        CustomComponent.customizeLabel(sizeLabel, 2);
+        ComponentCustomizer.customizeLabel(sizeLabel, 2);
         locationLabel = new JLabel(d.getPath());
-        CustomComponent.customizeLabel(locationLabel, 2);
+        ComponentCustomizer.customizeLabel(locationLabel, 2);
         var date = d.getTimeStamp().toString();
         downDateLabel = new JLabel(TextFormatUtil.formatPastTime(date, "EEE MMM dd HH:mm:ss zzzz yyyy"));
-        CustomComponent.customizeLabel(downDateLabel, 2);
+        ComponentCustomizer.customizeLabel(downDateLabel, 2);
         ////Pick icon according to type
         if(d.isRessourceVideo()) thumbLabel = new JLabel(videoFileIcon);
         else thumbLabel = new JLabel(audioFileIcon);
         thumbLabel.setPreferredSize(new Dimension(64,64));
         thumbLabel.setMaximumSize(new Dimension(64,64));
         ///Buttons
-        removeButton = new RoundJButton(removeIcon);
-        pauseButton = new RoundJButton(pauseIcon);
+        removeButton = new RoundedJButton(removeIcon);
+        pauseButton = new RoundedJButton(pauseIcon);
         ///progressBar
         jpb = new JProgressBar();
         jpb.setStringPainted(false); ///No percentage show
@@ -139,6 +139,6 @@ public class DownloadItemView extends JPanel implements PropertyChangeListener{
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         var  newValue = d.getProgress();
-        System.out.println("Progress: " + newValue);
+        ///System.out.println("Progress: " + newValue);
         jpb.setValue(newValue); }
 }

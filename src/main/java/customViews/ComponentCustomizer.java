@@ -14,7 +14,7 @@ import javax.swing.border.EmptyBorder;
  *
  * @author Jonathan Idy
  */
-public class CustomComponent {
+public class ComponentCustomizer {
     ///Customize component by id
     ///We need uniformity of components across the app
     public static void customizeLabel(JLabel label, int id){
